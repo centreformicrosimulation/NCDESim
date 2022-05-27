@@ -1,5 +1,6 @@
 package NCDESim.model;
 
+import lombok.Data;
 import microsim.engine.AbstractSimulationManager;
 import microsim.annotation.GUIparameter;
 import microsim.data.db.DatabaseUtils;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 
+@Data
 public class NCDESimModel extends AbstractSimulationManager implements EventListener {
 
 	private final static Logger log = Logger.getLogger(NCDESimModel.class);
@@ -78,40 +80,4 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		}
 	}
-
-
-	// ---------------------------------------------------------------------
-	// Own methods
-	// ---------------------------------------------------------------------
-
-
-
-	// ---------------------------------------------------------------------
-	// Access methods
-	// ---------------------------------------------------------------------
-
-	public Double getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Double endTime) {
-		this.endTime = endTime;
-	}
-
-	public Integer getNumberOfAgents() {
-		return numberOfAgents;
-	}
-
-	public void setNumberOfAgents(Integer numberOfAgents) {
-		this.numberOfAgents = numberOfAgents;
-	}
-
-	public List<Agent> getAgentsCreated() {
-		return agentsCreated;
-	}
-
-//	public List<Agent> getAgentsLoadedFromInputDatabase() {
-//		return agentsLoadedFromInputDatabase;
-//	}
-
 }

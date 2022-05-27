@@ -1,5 +1,6 @@
 package NCDESim.experiment;
 
+import lombok.Data;
 import microsim.annotation.GUIparameter;
 import microsim.engine.AbstractSimulationObserverManager;
 import microsim.engine.SimulationCollectorManager;

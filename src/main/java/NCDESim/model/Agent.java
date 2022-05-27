@@ -1,19 +1,24 @@
 package NCDESim.model;
 
+import lombok.*;
 import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.regression.RegressionUtils;
 
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Transient;
 
 @Entity
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public class Agent implements EventListener, IDoubleSource {
 
-	@Id
+	@EmbeddedId
 	private PanelEntityKey key = new PanelEntityKey(idCounter++);
 
 	@Transient
@@ -66,23 +71,16 @@ public class Agent implements EventListener, IDoubleSource {
 		}
 	}
 
-
-	// ---------------------------------------------------------------------
-	// Own methods
-	// ---------------------------------------------------------------------
-
-
-
-	// ---------------------------------------------------------------------
-	// Access methods
-	// ---------------------------------------------------------------------
-
-	public PanelEntityKey getKey() {
-		return key;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Agent agent = (Agent) o;
+		return key != null && key.equals(agent.key);
 	}
 
-	public double getWealth() {
-		return wealth;
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
 	}
-
 }
