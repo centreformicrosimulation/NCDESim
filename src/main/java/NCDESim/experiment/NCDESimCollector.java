@@ -1,5 +1,8 @@
 package NCDESim.experiment;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import microsim.annotation.GUIparameter;
 import microsim.data.DataExport;
 import microsim.engine.AbstractSimulationCollectorManager;
@@ -12,15 +15,18 @@ import org.apache.log4j.Logger;
 
 import NCDESim.model.NCDESimModel;
 
+@Getter
+@Setter
+@ToString
 public class NCDESimCollector extends AbstractSimulationCollectorManager implements EventListener {
 
 	private final static Logger log = Logger.getLogger(NCDESimCollector.class);
 
 	@GUIparameter(description = "Toggle to export snapshot to .csv files")
-	boolean exportToCSV = true;				//If true, data will be recorded to .csv files in the output directory
+	boolean exportToCSV = false;				//If true, data will be recorded to .csv files in the output directory
 
 	@GUIparameter(description = "Toggle to export snapshot to output database")
-	boolean exportToDatabase = true;		//If true, data will be recorded in the output database in the output directory
+	boolean exportToDatabase = false;		//If true, data will be recorded in the output database in the output directory
 
 	@GUIparameter(description = "Set the time at which to start exporting snaphots to the database and/or .csv files")
 	Double timeOfFirstSnapshot = 0.;
@@ -33,8 +39,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	}
 
 	//DataExport objects to handle exporting data to database and/or .csv files
-//	private DataExport exportAgentsFromInputDatabase;
-	private DataExport exportAgentsCreated;
+	private DataExport exportIndividuals;
 
 	// ---------------------------------------------------------------------
 	// Manager methods
@@ -42,8 +47,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 	public void buildObjects() {
 
-//		exportAgentsFromInputDatabase = new DataExport(((NCDESimModel) getManager()).getAgentsLoadedFromDatabase(), exportToDatabase, exportToCSV);
-		exportAgentsCreated = new DataExport(((NCDESimModel) getManager()).getAgentsCreated(), exportToDatabase, exportToCSV);
+		exportIndividuals = new DataExport(((NCDESimModel) getManager()).getIndividuals(), exportToDatabase, exportToCSV);
 
 		log.debug("Collector objects created");	}
 
@@ -74,8 +78,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 			//Export to database and/or .csv files
 			if(exportToDatabase || exportToCSV) {
-//				exportAgentsFromInputDatabase.export();
-				exportAgentsCreated.export();
+				exportIndividuals.export();
 			}
 
 			break;
@@ -91,39 +94,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 
 	// ---------------------------------------------------------------------
-	// Access methods
+	// Access methods are handled by Lombok
 	// ---------------------------------------------------------------------
-
-	public boolean isExportToCSV() {
-		return exportToCSV;
-	}
-
-	public void setExportToCSV(boolean exportToCSV) {
-		this.exportToCSV = exportToCSV;
-	}
-
-	public boolean isExportToDatabase() {
-		return exportToDatabase;
-	}
-
-	public void setExportToDatabase(boolean exportToDatabase) {
-		this.exportToDatabase = exportToDatabase;
-	}
-
-	public Double getTimeOfFirstSnapshot() {
-		return timeOfFirstSnapshot;
-	}
-
-	public void setTimeOfFirstSnapshot(Double timeOfFirstSnapshot) {
-		this.timeOfFirstSnapshot = timeOfFirstSnapshot;
-	}
-
-	public Double getTimestepsBetweenSnapshots() {
-		return timestepsBetweenSnapshots;
-	}
-
-	public void setTimestepsBetweenSnapshots(Double timestepsBetweenSnapshots) {
-		this.timestepsBetweenSnapshots = timestepsBetweenSnapshots;
-	}
 
 }

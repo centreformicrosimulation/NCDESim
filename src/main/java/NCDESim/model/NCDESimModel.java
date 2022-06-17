@@ -1,9 +1,10 @@
 package NCDESim.model;
 
+import NCDESim.experiment.NCDESimCollector;
 import lombok.Data;
+import microsim.data.db.DatabaseUtils;
 import microsim.engine.AbstractSimulationManager;
 import microsim.annotation.GUIparameter;
-import microsim.data.db.DatabaseUtils;
 import microsim.event.EventGroup;
 import microsim.event.EventListener;
 import microsim.event.Order;
@@ -13,20 +14,27 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 
+import javax.persistence.Transient;
+
 @Data
 public class NCDESimModel extends AbstractSimulationManager implements EventListener {
 
 	private final static Logger log = Logger.getLogger(NCDESimModel.class);
 
+	@Transient
+	NCDESimCollector collector;
+
 	@GUIparameter(description = "Set the number of agents to create")
 	Integer numberOfAgents = 10;
+
+	@GUIparameter(description = "Set the number of firms to create")
+	Integer numberOfFirms = 5;
 
 	@GUIparameter(description = "Set the time at which the simulation will terminate")
 	Double endTime = 20.;
 
-	private List<Agent> agentsCreated;
+	private List<Person> individuals;
 
-//	private List<Agent> agentsLoadedFromInputDatabase;
 
 	// ---------------------------------------------------------------------
 	// Manager methods
@@ -34,14 +42,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 	public void buildObjects() {
 
-		//Load agents from an input/input.h2.db database containing the Agent table (if there is one).
-//		agentsLoadedFromInputDatabase = (List<Agent>) DatabaseUtils.loadTable(Agent.class);
-
-		//Alternatively, create a collection of agents here
-		agentsCreated = new ArrayList<Agent>();
-		for(int i=0; i < numberOfAgents; i++) {
-			agentsCreated.add(new Agent());
-		}
+		createAgents();
+//		loadAgentsFromDatabase(); //Can be used instead of createAgents() to load agents from h2 database
 
 		log.debug("Model objects created");
 
@@ -51,8 +53,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		EventGroup modelEvents = new EventGroup();
 
-//		modelEvents.addCollectionEvent(agentsLoadedFromInputDatabase, Agent.Processes.AgentProcess);
-		modelEvents.addCollectionEvent(agentsCreated, Agent.Processes.AgentProcess);
+//		modelEvents.addCollectionEvent(agentsLoadedFromInputDatabase, Person.Processes.AgentProcess);
+		modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
 
 		getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
 
@@ -80,4 +82,25 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		}
 	}
+
+	// ---------------------------------------------------------------------
+	// Own methods
+	// ---------------------------------------------------------------------
+	protected void createAgents() {
+		/*
+		Create a collection of agents to simulate
+		 */
+		individuals = new ArrayList<Person>();
+		for(int i=0; i < numberOfAgents; i++) {
+			individuals.add(new Person());
+		}
+	}
+
+	protected void loadAgentsFromDatabase() {
+		//Load agents from an input/input.h2.db database containing the Person table (if there is one).
+		individuals = (List<Person>) DatabaseUtils.loadTable(Person.class);
+	}
+
+
+
 }

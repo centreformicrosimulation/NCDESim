@@ -39,6 +39,8 @@ public class NCDESimStart implements ExperimentBuilder {
 		NCDESimCollector collector = new NCDESimCollector(model);
 		NCDESimObserver observer = new NCDESimObserver(model, collector);
 
+		model.setCollector(collector);
+
 		engine.addSimulationManager(model);
 		engine.addSimulationManager(collector);
 		engine.addSimulationManager(observer);	
