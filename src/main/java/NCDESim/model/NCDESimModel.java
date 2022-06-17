@@ -10,8 +10,8 @@ import microsim.event.EventListener;
 import microsim.event.Order;
 import microsim.event.SingleTargetEvent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
 import org.apache.log4j.Logger;
 
 import javax.persistence.Transient;
@@ -34,6 +34,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	Double endTime = 20.;
 
 	private List<Person> individuals;
+	private Set<FirmTypeA> firms;
 
 
 	// ---------------------------------------------------------------------
@@ -88,11 +89,19 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	// ---------------------------------------------------------------------
 	protected void createAgents() {
 		/*
-		Create a collection of agents to simulate
+		Create a collection of individuals to simulate
 		 */
 		individuals = new ArrayList<Person>();
 		for(int i=0; i < numberOfAgents; i++) {
 			individuals.add(new Person());
+		}
+
+		/*
+		Create a collection of firms to simulate
+		 */
+		firms = new LinkedHashSet<FirmTypeA>();
+		for (int i=0; i < numberOfFirms; i++) {
+			firms.add(new FirmTypeA(true));
 		}
 	}
 
