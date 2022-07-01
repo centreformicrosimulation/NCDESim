@@ -13,17 +13,34 @@ import javax.persistence.Transient;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 public class Person extends Agent implements IDoubleSource {
 
 	@EmbeddedId
-	private PanelEntityKey key = new PanelEntityKey(idCounter++);
+	private PanelEntityKey key;
 
 	@Transient
 	private static long idCounter = 1;
 
-	private double age = 100 * SimulationEngine.getRnd().nextDouble();		//Each agent has a random age between 0 and 100
+	private double age;
 
+	private double chronicPainLevel;
+
+	private double psychologicalDistressLevel;
+
+	private double hourlyReservationWage;
+
+	// ---------------------------------------------------------------------
+	// Constructors and Initialization
+	// ---------------------------------------------------------------------
+	public Person() {
+		super();
+
+		this.key = new PanelEntityKey(idCounter++);
+		this.age = 100 * SimulationEngine.getRnd().nextDouble(); // Each person has a random age between 0 and 100
+		this.chronicPainLevel = 10 * SimulationEngine.getRnd().nextDouble(); // Each person has a random chronic pain level between 0 and 10
+		this.psychologicalDistressLevel = 10 * SimulationEngine.getRnd().nextDouble(); // Each person has a random psychological distress level between 0 and 10
+		this.hourlyReservationWage = 1000 * SimulationEngine.getRnd().nextDouble(); // Each person has an hourly wage between 0 and 1000
+	}
 
 	// ---------------------------------------------------------------------
 	// EventListener

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import microsim.engine.SimulationEngine;
 
 import javax.persistence.Transient;
 
@@ -22,6 +23,10 @@ public abstract class AbstractFirm extends Agent {
 
     private TreeSet<Amenity> amenitiesSet; // Set of amenities of a firm
 
+    private double hourlyOfferedWage; // Randomly drawn hourly wage offered by a firm
+
+    private double weeklyOfferedHours; // Weekly hours of work offered, fixed
+
     // ---------------------------------------------------------------------
     // Constructor
     // --------------------------------------------------------------------
@@ -31,6 +36,8 @@ public abstract class AbstractFirm extends Agent {
         // Define initial variables common to all types of firms
         this.employeesSet = new TreeSet<Person>();
         this.amenitiesSet = new TreeSet<Amenity>();
+        this.hourlyOfferedWage = 1000 * SimulationEngine.getRnd().nextDouble();
+        this.weeklyOfferedHours = 40;
     }
 
     // ---------------------------------------------------------------------
