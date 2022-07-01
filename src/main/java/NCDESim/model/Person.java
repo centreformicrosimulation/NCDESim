@@ -36,7 +36,6 @@ public class Person extends Agent implements IDoubleSource {
 	public void onEvent(Enum<?> type) {
 		switch ((Processes) type) {
 		case Ageing:
-
 		}
 	}
 

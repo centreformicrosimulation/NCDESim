@@ -1,6 +1,8 @@
 package NCDESim.model;
 
 import NCDESim.experiment.NCDESimCollector;
+import NCDESim.model.objects.Amenity;
+import NCDESim.model.objects.AmenityTypeA;
 import lombok.Data;
 import microsim.data.db.DatabaseUtils;
 import microsim.engine.AbstractSimulationManager;
@@ -34,8 +36,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	Double endTime = 20.;
 
 	private List<Person> individuals;
-	private Set<FirmTypeA> firms;
-
+	private Set<FirmTypeA> firmsTypeA;
+	private Set<Amenity> amenities; // Set of amenities available to firms
 
 	// ---------------------------------------------------------------------
 	// Manager methods
@@ -45,16 +47,12 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		createAgents();
 //		loadAgentsFromDatabase(); //Can be used instead of createAgents() to load agents from h2 database
-
-		log.debug("Model objects created");
-
 	}
 
 	public void buildSchedule() {
 
 		EventGroup modelEvents = new EventGroup();
 
-//		modelEvents.addCollectionEvent(agentsLoadedFromInputDatabase, Person.Processes.AgentProcess);
 		modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
 
 		getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
@@ -87,6 +85,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	// ---------------------------------------------------------------------
 	// Own methods
 	// ---------------------------------------------------------------------
+
 	protected void createAgents() {
 		/*
 		Create a collection of individuals to simulate
@@ -99,10 +98,17 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		/*
 		Create a collection of firms to simulate
 		 */
-		firms = new LinkedHashSet<FirmTypeA>();
+		firmsTypeA = new LinkedHashSet<FirmTypeA>();
 		for (int i=0; i < numberOfFirms; i++) {
-			firms.add(new FirmTypeA(true));
+			firmsTypeA.add(new FirmTypeA(true));
 		}
+	}
+
+	protected void createAmenities() {
+		/*
+		Create amenities available to firms
+		 */
+		amenities.add(new AmenityTypeA());
 	}
 
 	protected void loadAgentsFromDatabase() {
@@ -110,6 +116,9 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		individuals = (List<Person>) DatabaseUtils.loadTable(Person.class);
 	}
 
+	// ---------------------------------------------------------------------
+	// Access methods are handled by Lombok by default
+	// ---------------------------------------------------------------------
 
 
 }

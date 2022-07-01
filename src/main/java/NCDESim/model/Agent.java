@@ -7,6 +7,13 @@ import lombok.ToString;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 
+/**
+ * Agent class contains fields common to all simulated objects:
+ *  Person extends Agent
+ *  AbstractFirm extends Agent
+ *      FirmTypeA extends AbstractFirm (Multi-level inheritance)
+ */
+
 @Getter
 @Setter
 @ToString

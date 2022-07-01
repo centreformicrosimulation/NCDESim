@@ -32,14 +32,24 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	Double timeOfFirstSnapshot = 0.;
 
 	@GUIparameter(description = "Set the time between snapshots to be exported to the database and/or .csv files")
-	Double timestepsBetweenSnapshots = 1.;
-
-	public NCDESimCollector(SimulationManager manager) {
-		super(manager);
-	}
+	Double timeStepsBetweenSnapshots = 1.;
 
 	//DataExport objects to handle exporting data to database and/or .csv files
 	private DataExport exportIndividuals;
+	private DataExport exportFirmsTypeA;
+
+	//Other variables
+	NCDESimModel model;
+
+	// ---------------------------------------------------------------------
+	// Constructor
+	// ---------------------------------------------------------------------
+
+	public NCDESimCollector(SimulationManager manager) {
+
+		super(manager);
+		this.model = (NCDESimModel) getManager();
+	}
 
 	// ---------------------------------------------------------------------
 	// Manager methods
@@ -47,7 +57,8 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 	public void buildObjects() {
 
-		exportIndividuals = new DataExport(((NCDESimModel) getManager()).getIndividuals(), exportToDatabase, exportToCSV);
+		exportIndividuals = new DataExport(model.getIndividuals(), exportToDatabase, exportToCSV);
+		exportFirmsTypeA = new DataExport(model.getFirmsTypeA(), exportToDatabase, exportToCSV);
 
 		log.debug("Collector objects created");	}
 
@@ -55,9 +66,10 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 			EventGroup collectorEvents = new EventGroup();
 
-			collectorEvents.addEvent(this, Processes.DumpInfo);
+			collectorEvents.addEvent(this, Processes.DumpIndividuals);
+			collectorEvents.addEvent(this, Processes.DumpFirms);
 
-			getEngine().getEventQueue().scheduleRepeat(collectorEvents, timeOfFirstSnapshot, Order.AFTER_ALL.getOrdering()-1, timestepsBetweenSnapshots);
+			getEngine().getEventQueue().scheduleRepeat(collectorEvents, timeOfFirstSnapshot, Order.AFTER_ALL.getOrdering()-1, timeStepsBetweenSnapshots);
 
 		log.debug("Collector schedule created");
 	}
@@ -68,22 +80,21 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	// ---------------------------------------------------------------------
 
 	public enum Processes {
-		DumpInfo;
+		DumpIndividuals,
+		DumpFirms;
 	}
 
 	public void onEvent(Enum<?> type) {
 		switch ((Processes) type) {
 
-		case DumpInfo:
-
-			//Export to database and/or .csv files
-			if(exportToDatabase || exportToCSV) {
+			case DumpIndividuals:
 				exportIndividuals.export();
-			}
 
-			break;
-
+			case DumpFirms:
+				exportFirmsTypeA.export();
 		}
+
+
 	}
 
 
