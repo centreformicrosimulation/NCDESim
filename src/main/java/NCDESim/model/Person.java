@@ -17,17 +17,14 @@ public class Person extends Agent implements IDoubleSource {
 
 	@EmbeddedId
 	private PanelEntityKey key;
-
 	@Transient
 	private static long idCounter = 1;
-
+	private double alpha;
 	private double age;
-
-	private double chronicPainLevel;
-
-	private double psychologicalDistressLevel;
-
-	private double hourlyReservationWage;
+	private double health;
+	private double productivity;
+	private double wage;
+	private double wellbeing;
 
 	// ---------------------------------------------------------------------
 	// Constructors and Initialization
@@ -36,10 +33,10 @@ public class Person extends Agent implements IDoubleSource {
 		super();
 
 		this.key = new PanelEntityKey(idCounter++);
+		this.alpha = SimulationEngine.getRnd().nextDouble(); // Value of parameter alpha
 		this.age = 100 * SimulationEngine.getRnd().nextDouble(); // Each person has a random age between 0 and 100
-		this.chronicPainLevel = 10 * SimulationEngine.getRnd().nextDouble(); // Each person has a random chronic pain level between 0 and 10
-		this.psychologicalDistressLevel = 10 * SimulationEngine.getRnd().nextDouble(); // Each person has a random psychological distress level between 0 and 10
-		this.hourlyReservationWage = 1000 * SimulationEngine.getRnd().nextDouble(); // Each person has an hourly wage between 0 and 1000
+		this.health = SimulationEngine.getRnd().nextDouble() * 2 - 1; // Each person has a random health level between -1 and 1
+		this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
 	}
 
 	// ---------------------------------------------------------------------
@@ -75,6 +72,19 @@ public class Person extends Agent implements IDoubleSource {
 			default: 
 				throw new IllegalArgumentException("Unsupported variable");
 		}
+	}
+
+	// ---------------------------------------------------------------------
+	// Own methods
+	// ---------------------------------------------------------------------
+
+	public double calculateWellbeing() {
+		double wage = this.wage;
+		double health = this.health;
+
+		double wellbeing = wage + health;
+		
+		return wellbeing;
 	}
 
 	@Override

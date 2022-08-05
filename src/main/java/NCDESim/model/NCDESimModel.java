@@ -1,16 +1,16 @@
 package NCDESim.model;
 
 import NCDESim.experiment.NCDESimCollector;
-import NCDESim.model.objects.Amenity;
-import NCDESim.model.objects.AmenityTypeA;
 import lombok.Data;
 import microsim.data.db.DatabaseUtils;
 import microsim.engine.AbstractSimulationManager;
+import microsim.engine.SimulationEngine;
 import microsim.annotation.GUIparameter;
 import microsim.event.EventGroup;
 import microsim.event.EventListener;
 import microsim.event.Order;
 import microsim.event.SingleTargetEvent;
+
 
 import java.util.*;
 
@@ -22,6 +22,12 @@ import javax.persistence.Transient;
 public class NCDESimModel extends AbstractSimulationManager implements EventListener {
 
 	private final static Logger log = Logger.getLogger(NCDESimModel.class);
+
+	@GUIparameter(description = "Use a fixed random seed to start (pseudo) random number generator")
+	boolean fixRandomSeed 				= true;
+
+	@GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
+	Long seedIfFixed 					= 1166517026l;
 
 	@Transient
 	NCDESimCollector collector;
@@ -36,14 +42,16 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	Double endTime = 20.;
 
 	private List<Person> individuals;
-	private Set<FirmTypeA> firmsTypeA;
-	private Set<Amenity> amenities; // Set of amenities available to firms
+	private Set<AbstractFirm> firms;
 
 	// ---------------------------------------------------------------------
 	// Manager methods
 	// ---------------------------------------------------------------------
 
 	public void buildObjects() {
+
+		if(fixRandomSeed)										// If fixed, the model will follow the same trajectory as other executions withe same random number seed.
+			SimulationEngine.getRnd().setSeed(seedIfFixed);
 
 		createAgents();
 //		loadAgentsFromDatabase(); //Can be used instead of createAgents() to load agents from h2 database
@@ -98,17 +106,10 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		/*
 		Create a collection of firms to simulate
 		 */
-		firmsTypeA = new LinkedHashSet<FirmTypeA>();
+		firms = new LinkedHashSet<AbstractFirm>();
 		for (int i=0; i < numberOfFirms; i++) {
-			firmsTypeA.add(new FirmTypeA(true));
+			firms.add(new FirmTypeA(true));
 		}
-	}
-
-	protected void createAmenities() {
-		/*
-		Create amenities available to firms
-		 */
-		amenities.add(new AmenityTypeA());
 	}
 
 	protected void loadAgentsFromDatabase() {

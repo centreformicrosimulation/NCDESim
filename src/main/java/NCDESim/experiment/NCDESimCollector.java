@@ -58,7 +58,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	public void buildObjects() {
 
 		exportIndividuals = new DataExport(model.getIndividuals(), exportToDatabase, exportToCSV);
-		exportFirmsTypeA = new DataExport(model.getFirmsTypeA(), exportToDatabase, exportToCSV);
+		exportFirmsTypeA = new DataExport(model.getFirms(), exportToDatabase, exportToCSV);
 
 		log.debug("Collector objects created");	}
 

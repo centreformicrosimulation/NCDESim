@@ -34,6 +34,7 @@ public class FirmTypeA extends AbstractFirm implements EventListener {
     public FirmTypeA(boolean newFirm) {
         super(true);
         //Extend the AbstractFirm constructor
+        setCostOfAmenity(1);
 
     }
 
