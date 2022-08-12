@@ -1,5 +1,6 @@
 package NCDESim.model;
 
+import NCDESim.data.Parameters;
 import microsim.data.db.PanelEntityKey;
 import microsim.event.EventListener;
 
@@ -34,7 +35,6 @@ public class FirmTypeA extends AbstractFirm implements EventListener {
     public FirmTypeA(boolean newFirm) {
         super(true);
         //Extend the AbstractFirm constructor
-        setCostOfAmenity(1);
 
     }
 

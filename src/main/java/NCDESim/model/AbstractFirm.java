@@ -1,5 +1,7 @@
 package NCDESim.model;
 
+import NCDESim.data.Parameters;
+import NCDESim.model.objects.Job;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -35,13 +37,15 @@ public abstract class AbstractFirm extends Agent {
         this.employeesSet = new TreeSet<Person>();
         this.amenity = SimulationEngine.getRnd().nextDouble() * 2 - 1;
         this.wage = 2500 * SimulationEngine.getRnd().nextDouble();
+        this.costOfAmenity = calculateCostOfAmenity();
     }
 
     // ---------------------------------------------------------------------
     // Own methods
     // --------------------------------------------------------------------
-    public void addEmployee(Person employee) {
+    public void hireEmployee(Person employee, Job acceptedJob) {
         getEmployeesSet().add(employee); // Add employee (Person) to a set of employees of a firm
+        model.getJobList().remove(acceptedJob); //Remove accepted job offer from the list of available offers
     }
 
     public double calculateProfit() {
@@ -54,6 +58,14 @@ public abstract class AbstractFirm extends Agent {
         profit += amenity*costOfAmenity;
 
         return profit;
+    }
+    public double calculateCostOfAmenity() {
+        return Math.max(0, amenity* Parameters.COST_OF_AMENITY_MULTIPLIER); // Calculate cost of providing the amenity with a floor at zero
+    }
+
+    public void postJobOffer() {
+        Job jobToPost = new Job(this, this.amenity, this.wage); // Create a job offer
+        model.getJobList().add(jobToPost); // Add the job offer to the list of available offers
     }
 
 }

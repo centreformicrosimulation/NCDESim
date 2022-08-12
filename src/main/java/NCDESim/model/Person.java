@@ -1,5 +1,8 @@
 package NCDESim.model;
 
+import NCDESim.algorithms.Helpers;
+import NCDESim.data.Parameters;
+import NCDESim.model.objects.Job;
 import lombok.*;
 import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
@@ -8,6 +11,7 @@ import microsim.statistics.IDoubleSource;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
+import java.util.*;
 
 @Entity
 @Getter
@@ -24,7 +28,11 @@ public class Person extends Agent implements IDoubleSource {
 	private double health;
 	private double productivity;
 	private double wage;
+
 	private double wellbeing;
+
+	private int searchIntensity;
+	private Job job;
 
 	// ---------------------------------------------------------------------
 	// Constructors and Initialization
@@ -37,6 +45,8 @@ public class Person extends Agent implements IDoubleSource {
 		this.age = 100 * SimulationEngine.getRnd().nextDouble(); // Each person has a random age between 0 and 100
 		this.health = SimulationEngine.getRnd().nextDouble() * 2 - 1; // Each person has a random health level between -1 and 1
 		this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
+		this.job = null; // Job of the person
+		this.searchIntensity = SimulationEngine.getRnd().nextInt(Parameters.MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON);
 	}
 
 	// ---------------------------------------------------------------------
@@ -52,7 +62,6 @@ public class Person extends Agent implements IDoubleSource {
 		case Ageing:
 		}
 	}
-
 
 
 	// ---------------------------------------------------------------------
@@ -74,6 +83,7 @@ public class Person extends Agent implements IDoubleSource {
 		}
 	}
 
+
 	// ---------------------------------------------------------------------
 	// Own methods
 	// ---------------------------------------------------------------------
@@ -85,6 +95,18 @@ public class Person extends Agent implements IDoubleSource {
 		double wellbeing = wage + health;
 		
 		return wellbeing;
+	}
+
+	// Called when a person is hired by a firm to update employment-related information
+	public void updateEmploymentVariables(Job job) {
+		this.job = job; // Set person's job
+		this.wage = job.getWage();
+	}
+
+	// Method to allow person to search through the list of jobs and accept one
+	public void searchForJob() {
+		List<Job> sampledJobList = Helpers.pickNRandom(model.getJobList(), searchIntensity); // Sample n = searchIntensity jobs from all available. This produces a list of jobs available to this person.
+		Job selectedJob = Collections.max(sampledJobList); // Choose the "maximum" job from the list of sampled jobs. Note that the definition of the "maximum" depends on the comparator of the Job class.
 	}
 
 	@Override

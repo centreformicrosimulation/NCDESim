@@ -1,6 +1,7 @@
 package NCDESim.model;
 
 import NCDESim.experiment.NCDESimCollector;
+import NCDESim.model.objects.Job;
 import lombok.Data;
 import microsim.data.db.DatabaseUtils;
 import microsim.engine.AbstractSimulationManager;
@@ -21,6 +22,7 @@ import javax.persistence.Transient;
 @Data
 public class NCDESimModel extends AbstractSimulationManager implements EventListener {
 
+	//Parameters of the model
 	private final static Logger log = Logger.getLogger(NCDESimModel.class);
 
 	@GUIparameter(description = "Use a fixed random seed to start (pseudo) random number generator")
@@ -41,8 +43,10 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	@GUIparameter(description = "Set the time at which the simulation will terminate")
 	Double endTime = 20.;
 
+	//Objects
 	private List<Person> individuals;
 	private Set<AbstractFirm> firms;
+	private List<Job> jobList; //List of job offers made by firms, characterised by wage and amenity
 
 	// ---------------------------------------------------------------------
 	// Manager methods
