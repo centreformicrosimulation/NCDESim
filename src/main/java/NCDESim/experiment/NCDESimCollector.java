@@ -39,16 +39,14 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	private DataExport exportFirmsTypeA;
 
 	//Other variables
-	NCDESimModel model;
+	private NCDESimModel model;
 
 	// ---------------------------------------------------------------------
 	// Constructor
 	// ---------------------------------------------------------------------
 
 	public NCDESimCollector(SimulationManager manager) {
-
 		super(manager);
-		this.model = (NCDESimModel) getManager();
 	}
 
 	// ---------------------------------------------------------------------
@@ -56,6 +54,8 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	// ---------------------------------------------------------------------
 
 	public void buildObjects() {
+
+		model = (NCDESimModel) getManager();
 
 		exportIndividuals = new DataExport(model.getIndividuals(), exportToDatabase, exportToCSV);
 		exportFirmsTypeA = new DataExport(model.getFirms(), exportToDatabase, exportToCSV);

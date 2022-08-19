@@ -20,7 +20,6 @@ import microsim.event.EventListener;
 public abstract class Agent implements EventListener {
 
     protected NCDESimModel model;
-    protected NCDESimCollector collector;
 
     /*
     EventListener
@@ -40,7 +39,6 @@ public abstract class Agent implements EventListener {
 
     public Agent() {
         this.model = (NCDESimModel) SimulationEngine.getInstance().getManager(NCDESimModel.class.getCanonicalName());
-        this.collector = model.getCollector();
     }
 
     /*
@@ -49,7 +47,6 @@ public abstract class Agent implements EventListener {
 
     public void kill() {
         this.model = null;
-        this.collector = null;
     }
 
     /*

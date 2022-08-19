@@ -18,4 +18,5 @@ public class Parameters {
     //Values of parameters used by other simulated objects
     public static final double COST_OF_AMENITY_MULTIPLIER = 1000;
     public static final int MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON = 10; // Search intensity. Defines the maximum number of jobs a person can sample.
+
 }

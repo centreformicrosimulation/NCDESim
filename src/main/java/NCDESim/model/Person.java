@@ -32,6 +32,7 @@ public class Person extends Agent implements IDoubleSource {
 	private double wellbeing;
 
 	private int searchIntensity;
+	@Transient
 	private Job job;
 
 	// ---------------------------------------------------------------------
@@ -60,6 +61,7 @@ public class Person extends Agent implements IDoubleSource {
 	public void onEvent(Enum<?> type) {
 		switch ((Processes) type) {
 		case Ageing:
+			age();
 		}
 	}
 
@@ -87,6 +89,10 @@ public class Person extends Agent implements IDoubleSource {
 	// ---------------------------------------------------------------------
 	// Own methods
 	// ---------------------------------------------------------------------
+
+	public void age() {
+		age++;
+	}
 
 	public double calculateWellbeing() {
 		double wage = this.wage;

@@ -31,9 +31,6 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	@GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
 	Long seedIfFixed 					= 1166517026l;
 
-	@Transient
-	NCDESimCollector collector;
-
 	@GUIparameter(description = "Set the number of agents to create")
 	Integer numberOfAgents = 10;
 
@@ -59,6 +56,9 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		createAgents();
 //		loadAgentsFromDatabase(); //Can be used instead of createAgents() to load agents from h2 database
+
+		createAuxiliaryObjects(); // Initialize jobList
+
 	}
 
 	public void buildSchedule() {
@@ -66,9 +66,9 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		EventGroup modelEvents = new EventGroup();
 
 		modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
+		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.PostJobOffers);
 
 		getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
-
 		getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.End), endTime, Order.AFTER_ALL.getOrdering());
 
 		log.debug("Model schedule created");
@@ -102,7 +102,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		/*
 		Create a collection of individuals to simulate
 		 */
-		individuals = new ArrayList<Person>();
+		individuals = new LinkedList<>();
 		for(int i=0; i < numberOfAgents; i++) {
 			individuals.add(new Person());
 		}
@@ -110,10 +110,14 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		/*
 		Create a collection of firms to simulate
 		 */
-		firms = new LinkedHashSet<AbstractFirm>();
+		firms = new LinkedHashSet<>();
 		for (int i=0; i < numberOfFirms; i++) {
 			firms.add(new FirmTypeA(true));
 		}
+	}
+
+	protected void createAuxiliaryObjects() {
+		jobList = new LinkedList<>(); // Initialize list of jobs available to workers
 	}
 
 	protected void loadAgentsFromDatabase() {

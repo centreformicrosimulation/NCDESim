@@ -7,16 +7,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import microsim.engine.SimulationEngine;
+import microsim.event.EventListener;
+import microsim.statistics.IDoubleSource;
 
 import javax.persistence.Transient;
 
+import java.util.List;
 import java.util.TreeSet;
 
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public abstract class AbstractFirm extends Agent {
+public abstract class AbstractFirm extends Agent implements EventListener, IDoubleSource {
     // This class defines all variables that all types of firms have in common
 
     @Transient
@@ -25,8 +28,32 @@ public abstract class AbstractFirm extends Agent {
     private double costOfAmenity; // Cost of providing amenity
     private double wage; // Randomly drawn hourly wage offered by a firm
     private double profit; // Sum of (productivity per worker - wage) - max(0, cost * amenity)
+    private int desiredSize; // Size (number of employees) that firm wants to achieve.
 
+    // ---------------------------------------------------------------------
+    // EventListener
+    // ---------------------------------------------------------------------
 
+    public enum Processes {
+
+    }
+
+    public void onEvent(Enum<?> type) {
+        switch ((Processes) type) {
+
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // IDoubleSource
+    // ---------------------------------------------------------------------
+    public enum Variables{
+
+    }
+    @Override
+    public double getDoubleValue(Enum<?> anEnum) {
+        return 0;
+    }
     // ---------------------------------------------------------------------
     // Constructor
     // --------------------------------------------------------------------
@@ -38,6 +65,7 @@ public abstract class AbstractFirm extends Agent {
         this.amenity = SimulationEngine.getRnd().nextDouble() * 2 - 1;
         this.wage = 2500 * SimulationEngine.getRnd().nextDouble();
         this.costOfAmenity = calculateCostOfAmenity();
+        this.desiredSize = 5;
     }
 
     // ---------------------------------------------------------------------
@@ -60,12 +88,16 @@ public abstract class AbstractFirm extends Agent {
         return profit;
     }
     public double calculateCostOfAmenity() {
-        return Math.max(0, amenity* Parameters.COST_OF_AMENITY_MULTIPLIER); // Calculate cost of providing the amenity with a floor at zero
+        return amenity* Parameters.COST_OF_AMENITY_MULTIPLIER; // Calculate unrestricted cost of providing amenity. This implies that providing a disamenity increases firm's profit.
+    //    return Math.max(0, amenity* Parameters.COST_OF_AMENITY_MULTIPLIER); // Calculate cost of providing the amenity with a floor at zero
     }
 
-    public void postJobOffer() {
-        Job jobToPost = new Job(this, this.amenity, this.wage); // Create a job offer
-        model.getJobList().add(jobToPost); // Add the job offer to the list of available offers
+    public void postJobOffers() {
+        int numberOfOffersToPost = desiredSize - employeesSet.size(); // Firms post job offers to reach their desired size
+        for (int i = 0; i < numberOfOffersToPost; i++) {
+            Job jobToPost = new Job(this, this.amenity, this.wage); // Create a job offer
+            model.getJobList().add(jobToPost); // Add the job offer to the list of available offers
+        }
     }
 
 }

@@ -14,6 +14,10 @@ public class Job implements Comparable<Job> {
 
     private double wage; //Level of wage
 
+    /*
+    The comparator allows jobs to be compared one to another. This allows a list of jobs to be ordered.
+    Jobs are ordered by the wages they offer. TODO: order jobs by well-being they offer?
+     */
     @Override
     public int compareTo(Job j) {
         if (this.wage== j.wage)

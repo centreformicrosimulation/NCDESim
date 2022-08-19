@@ -71,7 +71,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 
 			csAgePlotter = new TimeSeriesSimulationPlotter("Agents' age", "Age");
 			for(Person person : model.getIndividuals()){
-				csAgePlotter.addSeries("Person " + person.getKey().getId(), (IDoubleSource) new MultiTraceFunction.Double(person, Person.Variables.Age));
+				csAgePlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Age));
 			}
 			GuiUtils.addWindow(csAgePlotter, 50, 120, 700, 450);
 
