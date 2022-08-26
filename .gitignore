@@ -28,3 +28,5 @@ replay_pid*
 
 # Model outputs
 output/
+*.out
+.idea/misc.xml
