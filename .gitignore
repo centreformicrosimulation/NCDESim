@@ -30,3 +30,5 @@ replay_pid*
 output/
 *.out
 .idea/misc.xml
+.idea/jpa-buddy.xml
+.idea/misc.xml

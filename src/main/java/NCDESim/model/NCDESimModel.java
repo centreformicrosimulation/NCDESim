@@ -29,7 +29,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	Integer numberOfAgents = 10;
 
 	@GUIparameter(description = "Set the number of firms to create")
-	Integer numberOfFirms = 5;
+	Integer numberOfFirms = 10;
 
 	@GUIparameter(description = "Set the time at which the simulation will terminate")
 	Double endTime = 20.;
@@ -59,8 +59,14 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		EventGroup modelEvents = new EventGroup();
 
+		modelEvents.addCollectionEvent(individuals, Person.Processes.BeginNewYear); // Update values of lagged variables
+
 		modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
 		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.PostJobOffers);
+		modelEvents.addCollectionEvent(individuals, Person.Processes.SearchForJob);
+
+		modelEvents.addCollectionEvent(individuals, Person.Processes.UpdateHealth);
+		modelEvents.addCollectionEvent(individuals, Person.Processes.UpdateUtility);
 
 		getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
 		getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.End), endTime, Order.AFTER_ALL.getOrdering());

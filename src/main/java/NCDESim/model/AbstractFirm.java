@@ -10,6 +10,7 @@ import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 
+import javax.persistence.Entity;
 import javax.persistence.Transient;
 
 import java.util.List;
@@ -71,9 +72,8 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     // ---------------------------------------------------------------------
     // Own methods
     // --------------------------------------------------------------------
-    public void hireEmployee(Person employee, Job acceptedJob) {
+    public void hireEmployee(Person employee) {
         getEmployeesSet().add(employee); // Add employee (Person) to a set of employees of a firm
-        model.getJobList().remove(acceptedJob); //Remove accepted job offer from the list of available offers
     }
 
     public double calculateProfit() {

@@ -36,7 +36,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 	@GUIparameter(description = "Set a regular time for any charts to update")
 	private Double chartUpdatePeriod = 1.;
 
-	private TimeSeriesSimulationPlotter csAgePlotter, averagePlotter;
+	private TimeSeriesSimulationPlotter csAgePlotter, csHealthPlotter, csWagePlotter, averagePlotter;
 
 	public NCDESimObserver(SimulationManager manager, SimulationCollectorManager collectorManager) {
 		super(manager, collectorManager);
@@ -75,6 +75,18 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			}
 			GuiUtils.addWindow(csAgePlotter, 50, 120, 700, 450);
 
+			csHealthPlotter = new TimeSeriesSimulationPlotter("Agents' health", "Health");
+			for(Person person : model.getIndividuals()){
+				csHealthPlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Health));
+			}
+			GuiUtils.addWindow(csHealthPlotter, 50, 570, 700, 450);
+
+			csWagePlotter = new TimeSeriesSimulationPlotter("Agents' wage", "Wage");
+			for(Person person : model.getIndividuals()){
+				csWagePlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Wage));
+			}
+			GuiUtils.addWindow(csWagePlotter, 750, 570, 700, 450);
+
 			CrossSection.Double wealthCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Age);				//Obtain wealth values by IDoubleSource interface...
 			averagePlotter = new TimeSeriesSimulationPlotter("Average age", "Age");
 			averagePlotter.addSeries("Average", new MeanArrayFunction(wealthCS));
@@ -90,6 +102,8 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			EventGroup chartingEvents = new EventGroup();
 
 			chartingEvents.addEvent(new SingleTargetEvent(csAgePlotter, CommonEventType.Update));
+			chartingEvents.addEvent(new SingleTargetEvent(csHealthPlotter, CommonEventType.Update));
+			chartingEvents.addEvent(new SingleTargetEvent(csWagePlotter, CommonEventType.Update));
 			chartingEvents.addEvent(new SingleTargetEvent(averagePlotter, CommonEventType.Update));
 			getEngine().getEventQueue().scheduleRepeat(chartingEvents, 0., Order.AFTER_ALL.getOrdering()-1, chartUpdatePeriod);
 		}

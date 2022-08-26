@@ -1,13 +1,19 @@
 package NCDESim.model;
 
-import NCDESim.data.Parameters;
+import lombok.*;
 import microsim.data.db.PanelEntityKey;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 
 import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
 import javax.persistence.Transient;
 
+@Entity
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public class FirmTypeA extends AbstractFirm implements EventListener, IDoubleSource {
 
     @EmbeddedId
@@ -29,6 +35,7 @@ public class FirmTypeA extends AbstractFirm implements EventListener, IDoubleSou
         switch ((Processes) type) {
             case PostJobOffers:
                 postJobOffers();
+                break;
         }
     }
 
