@@ -2,6 +2,7 @@ package NCDESim.model;
 
 import NCDESim.data.Parameters;
 import NCDESim.model.objects.Job;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -10,10 +11,6 @@ import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 
-import javax.persistence.Entity;
-import javax.persistence.Transient;
-
-import java.util.List;
 import java.util.TreeSet;
 
 @Getter
@@ -67,6 +64,16 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         this.wage = 2500 * SimulationEngine.getRnd().nextDouble();
         this.costOfAmenity = calculateCostOfAmenity();
         this.desiredSize = 5;
+    }
+
+    // Constructor to clone firms. Note that firms' characteristics are cloned, but not relationships to employees etc.
+    public AbstractFirm(AbstractFirm originalFirm) {
+        super();
+        this.employeesSet = new TreeSet<Person>(); // originalFirm is cloned, but cannot clone the employees
+        this.amenity = originalFirm.amenity;
+        this.wage = originalFirm.wage;
+        this.costOfAmenity = originalFirm.costOfAmenity;
+        this.desiredSize = originalFirm.desiredSize;
     }
 
     // ---------------------------------------------------------------------

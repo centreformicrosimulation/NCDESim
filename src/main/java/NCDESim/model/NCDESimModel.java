@@ -1,5 +1,6 @@
 package NCDESim.model;
 
+import NCDESim.algorithms.Helpers;
 import NCDESim.model.objects.Job;
 import lombok.Data;
 import microsim.data.db.DatabaseUtils;
@@ -20,17 +21,19 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	//Parameters of the model
 	private final static Logger log = Logger.getLogger(NCDESimModel.class);
 	@GUIparameter(description = "Use a fixed random seed to start (pseudo) random number generator")
-	boolean fixRandomSeed 				= true;
-
+	boolean fixRandomSeed = true;
 	@GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
-	Long seedIfFixed 					= 1166517026l;
-
-	@GUIparameter(description = "Set the number of agents to create")
+	Long seedIfFixed = 1166517026l;
+	@GUIparameter(description = "Set the number of agents to create at launch")
 	Integer numberOfAgents = 10;
+	@GUIparameter(description = "Set the number of firms to create at launch")
+	Integer initialNumberOfFirms = 10;
 
-	@GUIparameter(description = "Set the number of firms to create")
-	Integer numberOfFirms = 10;
+	@GUIparameter(description = "Set the number of firms to create each year")
+	Integer perYearNumberOfFirms = 10;
 
+	@GUIparameter(description = "Set the number of firms to create each year")
+	Double shareOfNewFirmsCloned = 0.5;
 	@GUIparameter(description = "Set the time at which the simulation will terminate")
 	Double endTime = 20.;
 
@@ -111,9 +114,31 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		Create a collection of firms to simulate
 		 */
 		firms = new LinkedHashSet<>();
-		for (int i=0; i < numberOfFirms; i++) {
+		for (int i = 0; i < initialNumberOfFirms; i++) {
 			firms.add(new FirmTypeA(true));
 		}
+	}
+
+	/**
+	 * Method to create new firms each simulated year.
+	 * perYearNumberOfFirms is created, split between clones of existing firms and new firms, with random level of
+	 * wages and amenities. The split is determined by shareOfNewFirmsCloned.
+	 */
+	protected void addNewFirms() {
+		int numberOfNewClonedFirmsToAdd = (int) (perYearNumberOfFirms * shareOfNewFirmsCloned);
+		int numberOfNewRandomFirmsToAdd = perYearNumberOfFirms - numberOfNewClonedFirmsToAdd;
+		List<AbstractFirm> listOfFirmsInTheSimulation = new ArrayList<>(firms);
+		List<AbstractFirm> listOfFirmsToClone = Helpers.pickNRandomFirms(listOfFirmsInTheSimulation, numberOfNewClonedFirmsToAdd);
+
+		for (int i = 0; i < numberOfNewClonedFirmsToAdd; i++) {
+			AbstractFirm firmToClone = listOfFirmsToClone.get(i);
+			firms.add(new FirmTypeA(firmToClone));
+		}
+
+		for (int i = 0; i < numberOfNewRandomFirmsToAdd; i++) {
+			firms.add(new FirmTypeA(true));
+		}
+
 	}
 
 	protected void createAuxiliaryObjects() {

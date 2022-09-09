@@ -4,10 +4,9 @@ import lombok.*;
 import microsim.data.db.PanelEntityKey;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
+import jakarta.persistence.EmbeddedId;
 
 @Entity
 @Getter
@@ -45,7 +44,10 @@ public class FirmTypeA extends AbstractFirm implements EventListener, IDoubleSou
     public FirmTypeA(boolean newFirm) {
         super(true);
         //Extend the AbstractFirm constructor
+    }
 
+    public FirmTypeA(AbstractFirm originalFirm) {
+        super(originalFirm);
     }
 
 
