@@ -61,7 +61,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         // Define initial variables common to all types of firms
         this.employeesSet = new TreeSet<Person>();
         this.amenity = SimulationEngine.getRnd().nextDouble() * 2 - 1;
-        this.wage = 2500 * SimulationEngine.getRnd().nextDouble();
+        this.wage = SimulationEngine.getRnd().nextDouble();
         this.costOfAmenity = calculateCostOfAmenity();
         this.desiredSize = 5;
     }
@@ -79,23 +79,28 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     // ---------------------------------------------------------------------
     // Own methods
     // --------------------------------------------------------------------
+
+    /**
+     * Update method refreshes values of firm variables.
+     */
+    public void update() {
+        profit = calculateProfit();
+    }
+
     public void hireEmployee(Person employee) {
         getEmployeesSet().add(employee); // Add employee (Person) to a set of employees of a firm
     }
 
     public double calculateProfit() {
         double profit = 0;
-
         for (Person employee : employeesSet) {
             profit += employee.getProductivity() - employee.getWage();
         }
-
-        profit += amenity*costOfAmenity;
-
+        profit -= amenity*costOfAmenity; // Subtract cost of amenity provision from the profit
         return profit;
     }
     public double calculateCostOfAmenity() {
-        return amenity* Parameters.COST_OF_AMENITY_MULTIPLIER; // Calculate unrestricted cost of providing amenity. This implies that providing a disamenity increases firm's profit.
+        return amenity * Parameters.COST_OF_AMENITY_MULTIPLIER; // Calculate unrestricted cost of providing amenity. This implies that providing a disamenity increases firm's profit.
     //    return Math.max(0, amenity* Parameters.COST_OF_AMENITY_MULTIPLIER); // Calculate cost of providing the amenity with a floor at zero
     }
 

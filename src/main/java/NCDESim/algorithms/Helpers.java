@@ -19,4 +19,12 @@ public class Helpers {
         Collections.shuffle(copy);
         return n > copy.size() ? copy.subList(0, copy.size()) : copy.subList(0, n);
     }
+
+    public static double findHighestProfitFromListOfFirms(List<AbstractFirm> lst) {
+        double highestProfit = -Double.MAX_VALUE;
+        for (AbstractFirm f : lst) {
+            if (f.getProfit() > highestProfit) highestProfit = f.getProfit();
+        }
+        return highestProfit;
+    }
 }

@@ -3,10 +3,10 @@ package NCDESim.model;
 import NCDESim.algorithms.Helpers;
 import NCDESim.model.objects.Job;
 import lombok.Data;
+import microsim.annotation.GUIparameter;
 import microsim.data.db.DatabaseUtils;
 import microsim.engine.AbstractSimulationManager;
 import microsim.engine.SimulationEngine;
-import microsim.annotation.GUIparameter;
 import microsim.event.EventGroup;
 import microsim.event.EventListener;
 import microsim.event.Order;
@@ -64,12 +64,15 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		modelEvents.addCollectionEvent(individuals, Person.Processes.BeginNewYear); // Update values of lagged variables
 
+		modelEvents.addEvent(this, Processes.AddNewFirms);
+
 		modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
 		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.PostJobOffers);
 		modelEvents.addCollectionEvent(individuals, Person.Processes.SearchForJob);
 
 		modelEvents.addCollectionEvent(individuals, Person.Processes.UpdateHealth);
 		modelEvents.addCollectionEvent(individuals, Person.Processes.UpdateUtility);
+		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.Update);
 
 		getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
 		getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.End), endTime, Order.AFTER_ALL.getOrdering());
@@ -84,12 +87,15 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	// ---------------------------------------------------------------------
 
 	public enum Processes {
+		AddNewFirms,
 		End;
 	}
 
 	public void onEvent(Enum<?> type) {
 		switch ((Processes) type) {
-
+		case AddNewFirms:
+			addNewFirms();
+			break;
 		case End:
 			getEngine().end();
 			break;
@@ -128,17 +134,24 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		int numberOfNewClonedFirmsToAdd = (int) (perYearNumberOfFirms * shareOfNewFirmsCloned);
 		int numberOfNewRandomFirmsToAdd = perYearNumberOfFirms - numberOfNewClonedFirmsToAdd;
 		List<AbstractFirm> listOfFirmsInTheSimulation = new ArrayList<>(firms);
-		List<AbstractFirm> listOfFirmsToClone = Helpers.pickNRandomFirms(listOfFirmsInTheSimulation, numberOfNewClonedFirmsToAdd);
+		List<AbstractFirm> listOfFirmsToClone = new ArrayList<>();
+		double highestProfit = Helpers.findHighestProfitFromListOfFirms(listOfFirmsInTheSimulation); // Highest profit observed in the simulated period
 
-		for (int i = 0; i < numberOfNewClonedFirmsToAdd; i++) {
-			AbstractFirm firmToClone = listOfFirmsToClone.get(i);
-			firms.add(new FirmTypeA(firmToClone));
+		for (int i = 0; i < numberOfNewClonedFirmsToAdd; i++) { // Sample existing firms with probability corresponding to their profits / maximum profit observed in the simulated year, until the desired number of firms is met
+			for (AbstractFirm firm : listOfFirmsInTheSimulation) {
+				double weight = firm.getProfit() / highestProfit;
+				if (Double.isNaN(weight)) weight = 0.5;
+				boolean add = SimulationEngine.getRnd().nextDouble() <= weight;
+				if (add) {
+					listOfFirmsToClone.add(new FirmTypeA(firm));
+					i++;
+					if (i >= numberOfNewClonedFirmsToAdd) {
+						break;
+					}
+				}
+			}
 		}
-
-		for (int i = 0; i < numberOfNewRandomFirmsToAdd; i++) {
-			firms.add(new FirmTypeA(true));
-		}
-
+		firms.addAll(listOfFirmsToClone); // Done here because otherwise would sample cloned firms when cloning
 	}
 
 	protected void createAuxiliaryObjects() {
