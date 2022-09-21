@@ -25,17 +25,17 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	@GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
 	Long seedIfFixed = 1166517026l;
 	@GUIparameter(description = "Set the number of agents to create at launch")
-	Integer numberOfAgents = 10;
+	Integer numberOfAgents = 100;
 	@GUIparameter(description = "Set the number of firms to create at launch")
-	Integer initialNumberOfFirms = 10;
+	Integer initialNumberOfFirms = 100;
 
 	@GUIparameter(description = "Set the number of firms to create each year")
 	Integer perYearNumberOfFirms = 10;
 
 	@GUIparameter(description = "Set the number of firms to create each year")
-	Double shareOfNewFirmsCloned = 0.5;
+	Double shareOfNewFirmsCloned = 0.75;
 	@GUIparameter(description = "Set the time at which the simulation will terminate")
-	Double endTime = 20.;
+	Double endTime = 100.;
 
 	//Objects
 	private List<Person> individuals;
@@ -72,7 +72,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		modelEvents.addCollectionEvent(individuals, Person.Processes.UpdateHealth);
 		modelEvents.addCollectionEvent(individuals, Person.Processes.UpdateUtility);
-		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.Update);
+		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.Update); // Update firms' state variables
 
 		getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
 		getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.End), endTime, Order.AFTER_ALL.getOrdering());
@@ -152,6 +152,10 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 			}
 		}
 		firms.addAll(listOfFirmsToClone); // Done here because otherwise would sample cloned firms when cloning
+	}
+
+	private void removeFirms() {
+		
 	}
 
 	protected void createAuxiliaryObjects() {

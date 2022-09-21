@@ -92,7 +92,9 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 
 	public enum Variables{
 		Age,
+		Count,
 		Health,
+		Utility,
 		Wage;
 	}
 
@@ -101,10 +103,14 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 		switch((Variables) variable){
 			case Age:
 				return age;
+			case Count:
+				return 1.;
 			case Health:
 				return health;
 			case Wage:
 				return wage;
+			case Utility:
+				return utility;
 			default: 
 				throw new IllegalArgumentException("Unsupported variable");
 		}

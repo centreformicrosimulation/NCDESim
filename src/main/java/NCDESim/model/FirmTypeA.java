@@ -28,7 +28,8 @@ public class FirmTypeA extends AbstractFirm implements EventListener, IDoubleSou
 
     public enum Processes {
         PostJobOffers,
-        Update;
+        Update,
+        Exit;
     }
 
     public void onEvent(Enum<?> type) {
@@ -54,5 +55,8 @@ public class FirmTypeA extends AbstractFirm implements EventListener, IDoubleSou
         super(originalFirm);
     }
 
+    // ---------------------------------------------------------------------
+    // Own methods
+    // ---------------------------------------------------------------------
 
 }

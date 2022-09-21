@@ -46,11 +46,25 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     // IDoubleSource
     // ---------------------------------------------------------------------
     public enum Variables{
-
+        AmenitiesLevel,
+        Count,
+        Profit,
+        Size,
     }
     @Override
-    public double getDoubleValue(Enum<?> anEnum) {
-        return 0;
+    public double getDoubleValue(Enum<?> variable) {
+        switch ((AbstractFirm.Variables) variable) {
+            case AmenitiesLevel:
+               return getAmenity();
+            case Count:
+                return 1.;
+            case Profit:
+                return profit;
+            case Size:
+                return getEmployeesSet().size();
+            default:
+                throw new IllegalArgumentException("Unsupported variable");
+        }
     }
     // ---------------------------------------------------------------------
     // Constructor
@@ -93,10 +107,10 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
 
     public double calculateProfit() {
         double profit = 0;
+        double unitCostOfAmenity = amenity * costOfAmenity; // Note that this is per employee
         for (Person employee : employeesSet) {
-            profit += employee.getProductivity() - employee.getWage();
+            profit += employee.getProductivity() - employee.getWage() - unitCostOfAmenity;
         }
-        profit -= amenity*costOfAmenity; // Subtract cost of amenity provision from the profit
         return profit;
     }
     public double calculateCostOfAmenity() {
