@@ -1,5 +1,6 @@
 package NCDESim.experiment;
 
+import NCDESim.data.Parameters;
 import NCDESim.model.AbstractFirm;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,6 +37,8 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 
 	@GUIparameter(description = "Toggle to display charts in the GUI")
 	private boolean showGraphs = true;
+
+	private boolean showIndividualGraphs = true;
 
 	@GUIparameter(description = "Set a regular time for any charts to update")
 	private Double chartUpdatePeriod = 1.;
@@ -74,11 +77,14 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 
 	public void buildObjects() {
 
+		final NCDESimModel model = ((NCDESimModel) getManager());
+
+		showIndividualGraphs = (model.getIndividuals().size() <= Parameters.SHOW_INDIVIDUAL_GRAPHS_NUMBER_OBSERVATIONS);
+
 		if(showGraphs) {
 
 			updateChartSet = new LinkedHashSet<>(); // Set of all charts needed to be scheduled for updating
 			tabSet = new LinkedHashSet<JComponent>();		//Set of all JInternalFrames each having a tab.  Each tab frame will potentially contain more than one cha
-			final NCDESimModel model = (NCDESimModel) getManager();
 
 			/**
 			 * AGE
@@ -87,7 +93,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			for(Person person : model.getIndividuals()){
 				csAgePlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Age));
 			}
-			addChart(csAgePlotter, "Age");
+
 
 			CrossSection.Double ageCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Age);				//Obtain age values by IDoubleSource interface...
 			averageAgePlotter = new TimeSeriesSimulationPlotter("Average age", "Age");
@@ -101,7 +107,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			for(Person person : model.getIndividuals()){
 				csHealthPlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Health));
 			}
-			addChart(csHealthPlotter, "Health");
+
 
 			CrossSection.Double healthCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Health);
 			averageHealthPlotter = new TimeSeriesSimulationPlotter("Average health", "Health");
@@ -115,7 +121,6 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			for(Person person : model.getIndividuals()){
 				csWagePlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Wage));
 			}
-			addChart(csWagePlotter, "Wage");
 
 			CrossSection.Double wageCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Wage);
 			averageWagePlotter = new TimeSeriesSimulationPlotter("Average wage", "Wage");
@@ -129,7 +134,6 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			for(Person person : model.getIndividuals()){
 				csUtilityPlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Utility));
 			}
-			addChart(csUtilityPlotter, "Utility");
 
 			CrossSection.Double utilityCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Utility);
 			averageUtilityPlotter = new TimeSeriesSimulationPlotter("Average utility", "Utility");
@@ -169,6 +173,15 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			populationPlotter.addSeries("Individuals", new SumArrayFunction.Double(populationIndividualsCS));
 			populationPlotter.addSeries("Firms", new SumArrayFunction.Double(populationFirmsCS));
 			addChart(populationPlotter, "Population");
+
+
+			// Add individual-level graphs
+			if (showIndividualGraphs) {
+				addChart(csAgePlotter, "Age");
+				addChart(csHealthPlotter, "Health");
+				addChart(csWagePlotter, "Wage");
+				addChart(csUtilityPlotter, "Utility");
+			}
 
 			//-------------------------------------------------------------------------------------------------------
 			//

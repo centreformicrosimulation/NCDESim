@@ -1,6 +1,7 @@
 package NCDESim.model;
 
 import NCDESim.algorithms.Helpers;
+import NCDESim.data.filters.FirmRemovalFilter;
 import NCDESim.model.objects.Job;
 import lombok.Data;
 import microsim.annotation.GUIparameter;
@@ -11,6 +12,8 @@ import microsim.event.EventGroup;
 import microsim.event.EventListener;
 import microsim.event.Order;
 import microsim.event.SingleTargetEvent;
+import microsim.statistics.CrossSection;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -70,9 +73,10 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.PostJobOffers);
 		modelEvents.addCollectionEvent(individuals, Person.Processes.SearchForJob);
 
-		modelEvents.addCollectionEvent(individuals, Person.Processes.UpdateHealth);
-		modelEvents.addCollectionEvent(individuals, Person.Processes.UpdateUtility);
+		modelEvents.addCollectionEvent(individuals, Person.Processes.Update); // Update persons' state variables
 		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.Update); // Update firms' state variables
+
+		modelEvents.addEvent(this, Processes.RemoveFirms); // Remove firms which meet criteria specified in FirmRemovalFilter from the simulation
 
 		getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
 		getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.End), endTime, Order.AFTER_ALL.getOrdering());
@@ -88,6 +92,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 	public enum Processes {
 		AddNewFirms,
+		RemoveFirms,
 		End;
 	}
 
@@ -95,6 +100,9 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		switch ((Processes) type) {
 		case AddNewFirms:
 			addNewFirms();
+			break;
+		case RemoveFirms:
+			removeFirms();
 			break;
 		case End:
 			getEngine().end();
@@ -155,7 +163,12 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	}
 
 	private void removeFirms() {
-		
+		List<AbstractFirm> firmsToRemove = new ArrayList<>();
+		CollectionUtils.select(getFirms(), new FirmRemovalFilter<AbstractFirm>(), firmsToRemove);
+		for (AbstractFirm firm : firmsToRemove) {
+			firm.prepareForRemoval();
+		}
+		firms.removeAll(firmsToRemove); // Remove all firms which meet criteria specified in the FirmRemovalFilter
 	}
 
 	protected void createAuxiliaryObjects() {

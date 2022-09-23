@@ -10,6 +10,7 @@ import lombok.ToString;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.TreeSet;
 
@@ -105,6 +106,14 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         getEmployeesSet().add(employee); // Add employee (Person) to a set of employees of a firm
     }
 
+    public void removeAllEmployees() {
+        // Iterate through all employees instead of simply clearing the employees set because person values should be updated
+        for (Person employee : employeesSet) {
+            employee.leaveJob();
+        }
+        getEmployeesSet().clear();
+    }
+
     public double calculateProfit() {
         double profit = 0;
         double unitCostOfAmenity = amenity * costOfAmenity; // Note that this is per employee
@@ -124,6 +133,10 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
             Job jobToPost = new Job(this, this.amenity, this.wage); // Create a job offer
             model.getJobList().add(jobToPost); // Add the job offer to the list of available offers
         }
+    }
+
+    public void prepareForRemoval() {
+        removeAllEmployees();
     }
 
 }

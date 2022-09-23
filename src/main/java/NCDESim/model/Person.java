@@ -61,8 +61,7 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 		Ageing,
 		BeginNewYear,
 		SearchForJob,
-		UpdateHealth,
-		UpdateUtility;
+		Update;
 	}
 
 	public void onEvent(Enum<?> type) {
@@ -76,10 +75,8 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 			case SearchForJob:
 				searchForJob();
 				break;
-			case UpdateHealth:
+			case Update:
 				updateHealth();
-				break;
-			case UpdateUtility:
 				updateUtility();
 				break;
 		}
@@ -161,11 +158,18 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 	// Method to allow person to search through the list of jobs and accept one
 	public void searchForJob() {
 		List<Job> sampledJobList = Helpers.pickNRandomJobs(model.getJobList(), searchIntensity); // Sample n = searchIntensity jobs from all available. This produces a list of jobs available to this person.
-		Map<Job, Double> utilityOfSampledJobsMap = calculateUtilityOfListOfJobs(sampledJobList); // A map of job - utility combinations for jobs sampled in the previous step
-		Job selectedJob = findJobWithHighestUtility(utilityOfSampledJobsMap); // Choose the job providing maximum utility to the person, from the list of sampled jobs.
-		this.updateEmploymentVariables(selectedJob); // Set person's job and wage
-		selectedJob.getEmployer().hireEmployee(this);
-		model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers
+		if (sampledJobList.size() > 0) {
+			Map<Job, Double> utilityOfSampledJobsMap = calculateUtilityOfListOfJobs(sampledJobList); // A map of job - utility combinations for jobs sampled in the previous step
+			Job selectedJob = findJobWithHighestUtility(utilityOfSampledJobsMap); // Choose the job providing maximum utility to the person, from the list of sampled jobs.
+			this.updateEmploymentVariables(selectedJob); // Set person's job and wage
+			selectedJob.getEmployer().hireEmployee(this);
+			model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers
+		}
+	}
+
+	public void leaveJob() {
+		Job noJob = new Job(null, 0., 0.);
+		this.updateEmploymentVariables(noJob);
 	}
 
 	// Method to calculate a utility of each job on the list. Returns a job - utility mapping.
