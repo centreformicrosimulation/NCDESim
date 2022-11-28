@@ -62,21 +62,17 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	public enum Processes {
 		Ageing,
 		BeginNewYear,
-		Update;
+		Update
 	}
 
 	public void onEvent(Enum<?> type) {
 		switch ((Processes) type) {
-			case Ageing:
-				age();
-				break;
-			case BeginNewYear:
-				beginNewYear();
-				break;
-			case Update:
+			case Ageing -> age();
+			case BeginNewYear -> beginNewYear();
+			case Update -> {
 				updateHealth();
 				updateUtility();
-				break;
+			}
 		}
 	}
 
@@ -86,19 +82,15 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 
 	public enum IntegerVariables {
 		ChangedJobs,
-		IsEmployed;
+		IsEmployed
 	}
 
 	@Override
 	public int getIntValue(Enum<?> variable) {
-		switch ((IntegerVariables) variable) {
-			case ChangedJobs:
-				return (flagChangedJobs == true)? 1 : 0;
-			case IsEmployed:
-				return (job.getEmployer() != null)? 1 : 0;
-			default:
-				throw new IllegalArgumentException("Unsupported variable");
-		}
+		return switch ((IntegerVariables) variable) {
+			case ChangedJobs -> (flagChangedJobs) ? 1 : 0;
+			case IsEmployed -> (job.getEmployer() != null) ? 1 : 0;
+		};
 	}
 
 	// ---------------------------------------------------------------------
@@ -111,27 +103,19 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		Count,
 		Health,
 		Utility,
-		Wage;
+		Wage
 	}
 
 	@Override
 	public double getDoubleValue(Enum<?> variable) {
-		switch((DoubleVariables) variable){
-			case Age:
-				return age;
-			case Amenities:
-				return job.getAmenity();
-			case Count:
-				return 1.;
-			case Health:
-				return health;
-			case Wage:
-				return job.getWage();
-			case Utility:
-				return utility;
-			default: 
-				throw new IllegalArgumentException("Unsupported variable");
-		}
+		return switch ((DoubleVariables) variable) {
+			case Age -> age;
+			case Amenities -> job.getAmenity();
+			case Count -> 1.;
+			case Health -> health;
+			case Wage -> job.getWage();
+			case Utility -> utility;
+		};
 	}
 
 
@@ -256,8 +240,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	}
 
 	@Override
-	public int compareTo(Person o) {
-		Person p = o;
+	public int compareTo(Person p) {
 		return (int) (this.getKey().getId() - p.getKey().getId());
 	}
 

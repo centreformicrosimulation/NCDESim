@@ -1,6 +1,5 @@
 package NCDESim.model;
 
-import NCDESim.experiment.NCDESimCollector;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

@@ -29,20 +29,20 @@ public class Helpers {
     }
 
     /**
-     * Calculate asinh(a) (Inverse Hyperbolic Sine Transformation)
-     * @param a
-     * @return
+     * Calculate asinh(v) (Inverse Hyperbolic Sine Transformation)
+     * @param v numerical value which the inverse hyperbolic sine transformation should be applied to.
+     * @return v transformed using the inverse hyperbolic sine transformation
      */
-    public static double asinh(double a) {
+    public static double asinh(double v) {
         final double sign;
         // check the sign bit of the raw representation to handle -0
-        if (Double.doubleToRawLongBits(a) < 0) {
-            a = Math.abs(a);
+        if (Double.doubleToRawLongBits(v) < 0) {
+            v = Math.abs(v);
             sign = -1.0d;
         } else {
             sign = 1.0d;
         }
 
-        return sign * Math.log(Math.sqrt(a * a + 1.0d) + a);
+        return sign * Math.log(Math.sqrt(v * v + 1.0d) + v);
     }
 }

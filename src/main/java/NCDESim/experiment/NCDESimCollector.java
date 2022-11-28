@@ -28,7 +28,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	@GUIparameter(description = "Toggle to export snapshot to output database")
 	boolean exportToDatabase = false;		//If true, data will be recorded in the output database in the output directory
 
-	@GUIparameter(description = "Set the time at which to start exporting snaphots to the database and/or .csv files")
+	@GUIparameter(description = "Set the time at which to start exporting snapshots to the database and/or .csv files")
 	Double timeOfFirstSnapshot = 0.;
 
 	@GUIparameter(description = "Set the time between snapshots to be exported to the database and/or .csv files")
@@ -81,7 +81,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 	public enum Processes {
 		DumpIndividuals,
-		DumpFirms;
+		DumpFirms
 	}
 
 	public void onEvent(Enum<?> type) {

@@ -26,7 +26,7 @@ public class NCDESimMultiRun extends MultiRun {
 	//Set the absolute maximum number of runs when using the MultiRun GUI.  The series of simulations will stop when this
 	//value is reached when using the MultiRun GUI.  Ensure that this is large enough to cover all necessary simulation runs
 	//to prevent premature termination of experiment.
-	private static Integer maxNumberOfRuns = (int) (numberOfRepeatedRuns * Math.log10(maxNumberOfAgents));
+	private static final Integer maxNumberOfRuns = (int) (numberOfRepeatedRuns * Math.log10(maxNumberOfAgents));
 
 
 	public static void main(String[] args) {
@@ -70,10 +70,8 @@ public class NCDESimMultiRun extends MultiRun {
 		}
 
 		// Define the continuation condition
-		if(numberOfAgents < maxNumberOfAgents) {		//Stop when the numberOfAgents goes above maxNumberOfAgents
-			return true;
-		}
-		else return false;
+		//Stop when the numberOfAgents goes above maxNumberOfAgents
+		return numberOfAgents < maxNumberOfAgents;
 	}
 
 	@Override
@@ -92,31 +90,31 @@ public class NCDESimMultiRun extends MultiRun {
 
 		for (int i = 0; i < args.length; i++) {
 
-			if (args[i].equals("-n")){			//Set the number of repeated runs in the experiment as a command line argument
+			switch (args[i]) {
+				case "-n" -> {            //Set the number of repeated runs in the experiment as a command line argument
 
-				try {
-					numberOfRepeatedRuns = Integer.parseInt(args[i + 1]);
-				} catch (NumberFormatException e) {
-					System.err.println("Argument " + args[i + 1] + " must be an integer reflecting the number of repeated simulations to run.");
-					System.exit(1);
+					try {
+						numberOfRepeatedRuns = Integer.parseInt(args[i + 1]);
+					} catch (NumberFormatException e) {
+						System.err.println("Argument " + args[i + 1] + " must be an integer reflecting the number of repeated simulations to run.");
+						System.exit(1);
+					}
+					i++;
 				}
-				
-				i++;
-			}
-			else if (args[i].equals("-a")){			//Set the maximum number of agents in the experiment as a command line argument
-				
-				try {
-				maxNumberOfAgents = Integer.parseInt(args[i + 1]);
-				} catch (NumberFormatException e) {
-					System.err.println("Argument " + args[i + 1] + " must be an integer reflecting the maximum number of agents.");
-					System.exit(1);
+				case "-a" -> {            //Set the maximum number of agents in the experiment as a command line argument
+
+					try {
+						maxNumberOfAgents = Integer.parseInt(args[i + 1]);
+					} catch (NumberFormatException e) {
+						System.err.println("Argument " + args[i + 1] + " must be an integer reflecting the maximum number of agents.");
+						System.exit(1);
+					}
+					i++;
 				}
-				
-				i++;
-			}
-			else if (args[i].equals("-g")){			//Toggle the MultiRun Gui on / off by passing the string '-g true' (on) or '-g false' (off) as a command line argument
-				executeWithGui = Boolean.parseBoolean(args[i + 1]);
-				i++;
+				case "-g" -> {            //Toggle the MultiRun Gui on / off by passing the string '-g true' (on) or '-g false' (off) as a command line argument
+					executeWithGui = Boolean.parseBoolean(args[i + 1]);
+					i++;
+				}
 			}
 		}
 	}

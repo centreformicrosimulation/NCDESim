@@ -20,7 +20,7 @@ public class NCDESimStart implements ExperimentBuilder {
 		* database during the simulation, an exception will be thrown.  */
 		engine.setTurnOffDatabaseConnection(false);
 
-		MicrosimShell gui = null;
+		MicrosimShell gui;
 		if (showGui) {
 			gui = new MicrosimShell(engine);
 			gui.setVisible(true);

@@ -31,8 +31,6 @@ output/
 *.out
 .idea/misc.xml
 .idea/jpa-buddy.xml
-.idea/misc.xml
-.idea/
 
 # Maven related
 target/

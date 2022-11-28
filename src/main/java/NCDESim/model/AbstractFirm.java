@@ -10,7 +10,6 @@ import lombok.ToString;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.TreeSet;
 
@@ -54,18 +53,12 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     }
     @Override
     public double getDoubleValue(Enum<?> variable) {
-        switch ((AbstractFirm.Variables) variable) {
-            case AmenitiesLevel:
-               return getAmenity();
-            case Count:
-                return 1.;
-            case Profit:
-                return profit;
-            case Size:
-                return getEmployeesSet().size();
-            default:
-                throw new IllegalArgumentException("Unsupported variable");
-        }
+        return switch ((Variables) variable) {
+            case AmenitiesLevel -> getAmenity();
+            case Count -> 1.;
+            case Profit -> profit;
+            case Size -> getEmployeesSet().size();
+        };
     }
     // ---------------------------------------------------------------------
     // Constructor
@@ -74,7 +67,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     public AbstractFirm(boolean newFirm) {
         super();
         // Define initial variables common to all types of firms
-        this.employeesSet = new TreeSet<Person>();
+        this.employeesSet = new TreeSet<>();
         this.amenity = SimulationEngine.getRnd().nextDouble() * 2 - 1;
         this.wage = SimulationEngine.getRnd().nextDouble();
         this.costOfAmenity = calculateCostOfAmenity();
@@ -84,7 +77,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     // Constructor to clone firms. Note that firms' characteristics are cloned, but not relationships to employees etc.
     public AbstractFirm(AbstractFirm originalFirm) {
         super();
-        this.employeesSet = new TreeSet<Person>(); // originalFirm is cloned, but cannot clone the employees
+        this.employeesSet = new TreeSet<>(); // originalFirm is cloned, but cannot clone the employees
         this.amenity = originalFirm.amenity;
         this.wage = originalFirm.wage;
         this.costOfAmenity = originalFirm.costOfAmenity;
@@ -128,7 +121,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         return profit;
     }
     public double calculateCostOfAmenity() {
-        return amenity * Parameters.COST_OF_AMENITY_MULTIPLIER; // Calculate unrestricted cost of providing amenity. This implies that providing a disamenity increases firm's profit.
+        return amenity * Parameters.COST_OF_AMENITY_MULTIPLIER; // Calculate unrestricted cost of providing amenity. This implies that providing a dis-amenity increases firm's profit.
     //    return Math.max(0, amenity* Parameters.COST_OF_AMENITY_MULTIPLIER); // Calculate cost of providing the amenity with a floor at zero
     }
 

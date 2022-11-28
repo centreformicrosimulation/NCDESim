@@ -20,11 +20,6 @@ public class Job implements Comparable<Job> {
      */
     @Override
     public int compareTo(Job j) {
-        if (this.wage== j.wage)
-            return 0;
-        else if (this.wage>j.wage)
-            return 1;
-        else
-            return -1;
+        return Double.compare(this.wage, j.wage);
     }
 }

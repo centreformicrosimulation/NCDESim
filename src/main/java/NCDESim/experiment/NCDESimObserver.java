@@ -87,9 +87,9 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 		if(showGraphs) {
 
 			updateChartSet = new LinkedHashSet<>(); // Set of all charts needed to be scheduled for updating
-			tabSet = new LinkedHashSet<JComponent>();		//Set of all JInternalFrames each having a tab.  Each tab frame will potentially contain more than one cha
+			tabSet = new LinkedHashSet<>();		//Set of all JInternalFrames each having a tab.  Each tab frame will potentially contain more than one cha
 
-			/**
+			/*
 			 * NUMBER OF INDIVIDUALS AND FIRMS
 			 */
 			CrossSection.Double populationIndividualsCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Count);
@@ -99,7 +99,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			populationPlotter.addSeries("Firms", new SumArrayFunction.Double(populationFirmsCS));
 			addChart(populationPlotter, "Population");
 
-			/**
+			/*
 			 * AGE (INDIVIDUALS)
 			 */
 			csAgePlotter = new TimeSeriesSimulationPlotter("Agents' age", "Age");
@@ -112,7 +112,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageAgePlotter.addSeries("Average", new MeanArrayFunction(ageCS));
 			addChart(averageAgePlotter, "IND Avg. age");
 
-			/**
+			/*
 			 * EMPLOYMENT (INDIVIDUALS)
 			 */
 			CrossSection.Integer employedCS = new CrossSection.Integer(model.getIndividuals(), Person.IntegerVariables.IsEmployed);
@@ -122,7 +122,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageEmployedPlotter.addSeries("Changed jobs", new MeanArrayFunction(changedJobsCS));
 			addChart(averageEmployedPlotter, "IND Employment stats");
 
-			/**
+			/*
 			 * HEALTH (INDIVIDUALS)
 			 */
 			csHealthPlotter = new TimeSeriesSimulationPlotter("Agents' health", "Health");
@@ -135,7 +135,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageHealthPlotter.addSeries("Average", new MeanArrayFunction(healthCS));
 			addChart(averageHealthPlotter, "IND Avg. health");
 
-			/**
+			/*
 			 * AMENITIES (INDIVIDUALS)
 			 */
 			csAmenitiesPlotter = new TimeSeriesSimulationPlotter("Agents' amenities", "Amenities");
@@ -148,7 +148,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageIndividualAmenitiesPlotter.addSeries("Average", new MeanArrayFunction(amenitiesCS));
 			addChart(averageIndividualAmenitiesPlotter, "IND Avg. amenities");
 
-			/**
+			/*
 			 * WAGE (INDIVIDUALS)
 			 */
 			csWagePlotter = new TimeSeriesSimulationPlotter("Agents' wage", "Wage");
@@ -161,7 +161,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageWagePlotter.addSeries("Average", new MeanArrayFunction(wageCS));
 			addChart(averageWagePlotter, "IND Avg. wage");
 
-			/**
+			/*
 			 * UTILITY (INDIVIDUALS)
 			 */
 			csUtilityPlotter = new TimeSeriesSimulationPlotter("Agents' utility", "Utility");
@@ -174,7 +174,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageUtilityPlotter.addSeries("Average", new MeanArrayFunction(utilityCS));
 			addChart(averageUtilityPlotter, "IND Avg. utility");
 
-			/**
+			/*
 			 * AMENITIES (FIRM)
 			 */
 			CrossSection.Double amenitiesFirmCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.AmenitiesLevel);
@@ -182,7 +182,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageFirmAmenitiesPlotter.addSeries("Average", new MeanArrayFunction(amenitiesFirmCS));
 			addChart(averageFirmAmenitiesPlotter, "FIRM Avg. amenities");
 
-			/**
+			/*
 			 * PROFITS (FIRM)
 			 */
 			CrossSection.Double profitCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Profit);
@@ -190,7 +190,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageProfitPlotter.addSeries("Average", new MeanArrayFunction(profitCS));
 			addChart(averageProfitPlotter, "FIRM Avg. profit");
 
-			/**
+			/*
 			 * SIZE (FIRM)
 			 */
 			CrossSection.Double sizeCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Size);
@@ -208,8 +208,8 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 				addChart(csAmenitiesPlotter, "IND Amenities");
 			}
 
-			/**
-			 * SCATTERPLOTS (INDIVIDUALS)
+			/*
+			 * SCATTER PLOTS (INDIVIDUALS)
 			 */
 			scatterIndividualHealthUtility = new ScatterplotSimulationPlotter("Health and utility", "Health", "Utility");
 			scatterIndividualHealthUtility.addSeries("Health and utility", new MeanArrayFunction(healthCS), new MeanArrayFunction(utilityCS));
@@ -249,12 +249,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			for(JInternalFrame plot: updateChartSet) {
 				chartingEvents.addEvent(plot, CommonEventType.Update);
 			}
-			/*
-			chartingEvents.addEvent(new SingleTargetEvent(csAgePlotter, CommonEventType.Update));
-			chartingEvents.addEvent(new SingleTargetEvent(csHealthPlotter, CommonEventType.Update));
-			chartingEvents.addEvent(new SingleTargetEvent(csWagePlotter, CommonEventType.Update));
-			chartingEvents.addEvent(new SingleTargetEvent(averagePlotter, CommonEventType.Update));
-			 */
+
 			getEngine().getEventQueue().scheduleRepeat(chartingEvents, 0., Order.AFTER_ALL.getOrdering()-1, chartUpdatePeriod);
 		}
 

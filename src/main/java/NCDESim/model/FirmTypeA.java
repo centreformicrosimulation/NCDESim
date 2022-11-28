@@ -29,17 +29,13 @@ public class FirmTypeA extends AbstractFirm implements EventListener, IDoubleSou
     public enum Processes {
         PostJobOffers,
         Update,
-        Exit;
+        Exit
     }
 
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
-            case PostJobOffers:
-                postJobOffers();
-                break;
-            case Update:
-                update();
-                break;
+            case PostJobOffers -> postJobOffers();
+            case Update -> update();
         }
     }
 
