@@ -1,7 +1,9 @@
 package NCDESim.model;
 
 import NCDESim.algorithms.Helpers;
+import NCDESim.data.Parameters;
 import NCDESim.data.filters.FirmRemovalFilter;
+import NCDESim.data.filters.IndividualCanLookForJobFilter;
 import NCDESim.model.objects.Job;
 import lombok.Data;
 import microsim.annotation.GUIparameter;
@@ -12,7 +14,6 @@ import microsim.event.EventGroup;
 import microsim.event.EventListener;
 import microsim.event.Order;
 import microsim.event.SingleTargetEvent;
-import microsim.statistics.CrossSection;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -31,16 +32,15 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 	Integer numberOfAgents = 100;
 	@GUIparameter(description = "Set the number of firms to create at launch")
 	Integer initialNumberOfFirms = 100;
-
 	@GUIparameter(description = "Set the number of firms to create each year")
 	Integer perYearNumberOfFirms = 10;
-
 	@GUIparameter(description = "Set the number of firms to create each year")
 	Double shareOfNewFirmsCloned = 0.75;
 	@GUIparameter(description = "Set the time at which the simulation will terminate")
 	Double endTime = 100.;
 
 	//Objects
+	private int time;
 	private List<Person> individuals;
 	private Set<AbstractFirm> firms;
 	private List<Job> jobList; //List of job offers made by firms, characterised by wage and amenity
@@ -65,13 +65,15 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 		EventGroup modelEvents = new EventGroup();
 
-		modelEvents.addCollectionEvent(individuals, Person.Processes.BeginNewYear); // Update values of lagged variables
+		modelEvents.addEvent(this, Processes.BeginNewYear); // Increment model time variable by 1
+		modelEvents.addCollectionEvent(individuals, Person.Processes.BeginNewYear); // Update values of individuals' lagged variables
 
 		modelEvents.addEvent(this, Processes.AddNewFirms);
 
-		modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
+	//	modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
 		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.PostJobOffers);
-		modelEvents.addCollectionEvent(individuals, Person.Processes.SearchForJob);
+
+		modelEvents.addEvent(this, Processes.JobSearch);
 
 		modelEvents.addCollectionEvent(individuals, Person.Processes.Update); // Update persons' state variables
 		modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.Update); // Update firms' state variables
@@ -92,8 +94,10 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
 	public enum Processes {
 		AddNewFirms,
+		JobSearch,
 		RemoveFirms,
-		End;
+		End,
+		BeginNewYear;
 	}
 
 	public void onEvent(Enum<?> type) {
@@ -101,11 +105,17 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		case AddNewFirms:
 			addNewFirms();
 			break;
+		case JobSearch:
+			jobSearch();
+			break;
 		case RemoveFirms:
 			removeFirms();
 			break;
 		case End:
 			getEngine().end();
+			break;
+		case BeginNewYear:
+			time++;
 			break;
 
 		}
@@ -142,7 +152,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		int numberOfNewClonedFirmsToAdd = (int) (perYearNumberOfFirms * shareOfNewFirmsCloned);
 		int numberOfNewRandomFirmsToAdd = perYearNumberOfFirms - numberOfNewClonedFirmsToAdd;
 		List<AbstractFirm> listOfFirmsInTheSimulation = new ArrayList<>(firms);
-		List<AbstractFirm> listOfFirmsToClone = new ArrayList<>();
+		List<AbstractFirm> listOfClonedFirms = new ArrayList<>(numberOfNewClonedFirmsToAdd);
+		List<AbstractFirm> listOfRandomFirms = new ArrayList<>(numberOfNewRandomFirmsToAdd);
 		double highestProfit = Helpers.findHighestProfitFromListOfFirms(listOfFirmsInTheSimulation); // Highest profit observed in the simulated period
 
 		for (int i = 0; i < numberOfNewClonedFirmsToAdd; i++) { // Sample existing firms with probability corresponding to their profits / maximum profit observed in the simulated year, until the desired number of firms is met
@@ -151,7 +162,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 				if (Double.isNaN(weight)) weight = 0.5;
 				boolean add = SimulationEngine.getRnd().nextDouble() <= weight;
 				if (add) {
-					listOfFirmsToClone.add(new FirmTypeA(firm));
+					listOfClonedFirms.add(new FirmTypeA(firm));
 					i++;
 					if (i >= numberOfNewClonedFirmsToAdd) {
 						break;
@@ -159,7 +170,24 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 				}
 			}
 		}
-		firms.addAll(listOfFirmsToClone); // Done here because otherwise would sample cloned firms when cloning
+
+		for (int i = 0; i < numberOfNewRandomFirmsToAdd; i++) { // Add the required number of new firms with random characteristics
+			listOfRandomFirms.add(new FirmTypeA(true));
+		}
+
+		firms.addAll(listOfClonedFirms); // Done here because otherwise would sample cloned firms when cloning
+		firms.addAll(listOfRandomFirms);
+	}
+
+	private void jobSearch() {
+		List<Person> individualsLookingForJobs = new ArrayList<>(); // According to the documentation it is not possible to have filters in the yearly schedule directly. Job search is therefore all handled here, instead of splitting the updating of the filtered list and job search into two parts.
+
+		if (!Parameters.ON_THE_JOB_SEARCH) {
+			CollectionUtils.select(individuals, new IndividualCanLookForJobFilter<Person>(), individualsLookingForJobs);
+		} else {
+			individualsLookingForJobs.addAll(individuals);
+		}
+		individualsLookingForJobs.forEach(Person::searchForJob); // Call searchForJob method on each person on the list of individuals lookingForJobs
 	}
 
 	private void removeFirms() {

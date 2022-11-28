@@ -10,13 +10,15 @@ import microsim.statistics.IDoubleSource;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 import jakarta.persistence.EmbeddedId;
+import microsim.statistics.IIntSource;
+
 import java.util.*;
 
 @Entity
 @Getter
 @Setter
 @ToString
-public class Person extends Agent implements IDoubleSource, Comparable<Person> {
+public class Person extends Agent implements IDoubleSource, IIntSource, Comparable<Person> {
 
 	@EmbeddedId
 	private PanelEntityKey key;
@@ -26,13 +28,11 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 	private int age;
 	private double health, health_L1;
 	private double productivity;
-	private double wage;
-
 	private double utility;
-
 	private int searchIntensity;
 	@Transient
 	private Job job;
+	private boolean flagChangedJobs;
 
 	// ---------------------------------------------------------------------
 	// Constructors and Initialization
@@ -41,13 +41,15 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 		super();
 
 		this.key = new PanelEntityKey(idCounter++);
-		this.alpha = SimulationEngine.getRnd().nextDouble(); // Value of parameter alpha
+		this.alpha = SimulationEngine.getRnd().nextDouble() * 0.1; // Value of parameter alpha
 		this.age = SimulationEngine.getRnd().nextInt(100); // Each person has a random age between 0 and 100
 		this.health = SimulationEngine.getRnd().nextDouble() * 2 - 1; // Each person has a random health level between -1 and 1
 		this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
 		this.job = new Job(null, 0., 0.); // Job of the person
-		this.wage = job.getWage(); // Wage of the person
-		this.searchIntensity = SimulationEngine.getRnd().nextInt(Parameters.MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON)+1;
+		this.searchIntensity = SimulationEngine.getRnd().nextInt(Parameters.MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON)+1; // Only used if turned on in Parameters
+
+		// Initialise flag variables
+		this.flagChangedJobs = false; // Indicates if individual who was employed changed jobs
 
 		// Initialise lagged values
 		this.health_L1 = health; // In the first period, lagged value of health is equal to the value of health
@@ -60,7 +62,6 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 	public enum Processes {
 		Ageing,
 		BeginNewYear,
-		SearchForJob,
 		Update;
 	}
 
@@ -72,9 +73,6 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 			case BeginNewYear:
 				beginNewYear();
 				break;
-			case SearchForJob:
-				searchForJob();
-				break;
 			case Update:
 				updateHealth();
 				updateUtility();
@@ -82,13 +80,34 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 		}
 	}
 
+	// ---------------------------------------------------------------------
+	// IIntSource
+	// ---------------------------------------------------------------------
+
+	public enum IntegerVariables {
+		ChangedJobs,
+		IsEmployed;
+	}
+
+	@Override
+	public int getIntValue(Enum<?> variable) {
+		switch ((IntegerVariables) variable) {
+			case ChangedJobs:
+				return (flagChangedJobs == true)? 1 : 0;
+			case IsEmployed:
+				return (job.getEmployer() != null)? 1 : 0;
+			default:
+				throw new IllegalArgumentException("Unsupported variable");
+		}
+	}
 
 	// ---------------------------------------------------------------------
 	// IDoubleSource
 	// ---------------------------------------------------------------------
 
-	public enum Variables{
+	public enum DoubleVariables {
 		Age,
+		Amenities,
 		Count,
 		Health,
 		Utility,
@@ -97,15 +116,17 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 
 	@Override
 	public double getDoubleValue(Enum<?> variable) {
-		switch((Variables) variable){
+		switch((DoubleVariables) variable){
 			case Age:
 				return age;
+			case Amenities:
+				return job.getAmenity();
 			case Count:
 				return 1.;
 			case Health:
 				return health;
 			case Wage:
-				return wage;
+				return job.getWage();
 			case Utility:
 				return utility;
 			default: 
@@ -124,6 +145,9 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 
 	// Method to update lagged values at the beginning of each new year
 	public void beginNewYear() {
+		// Reset flag variables
+		this.flagChangedJobs = false; // Reset at the beginning of the time period. Set to true if individual changes jobs in searchForJob() method.
+
 		// Update lagged values
 		this.health_L1 = health;
 	}
@@ -134,7 +158,8 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 
 	// Method to calculate the level of health
 	public void updateHealth() {
-		health = health_L1 + alpha * job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
+	//	health = health_L1 + alpha * job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
+		health = health_L1 + 1 * job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
 	}
 
 	public void updateUtility() {
@@ -142,7 +167,7 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 	}
 
 	public double calculateUtility() { // Utility is also referred to as well-being in the model
-		return Parameters.evaluateUtilityFunction(health, wage);
+		return Parameters.evaluateUtilityFunction(health, job.getWage());
 	}
 
 	/**
@@ -150,26 +175,51 @@ public class Person extends Agent implements IDoubleSource, Comparable<Person> {
 	 */
 
 	// Called when a person is hired by a firm to update employment-related information
-	public void updateEmploymentVariables(Job job) {
-		this.job = job; // Set person's job
-		this.wage = job.getWage();
+	public void updateEmployment(Job job) {
+		if (this.job.getEmployer() != null) { // Check if person is currently employed
+			leaveJob(); // Make person leave their current job
+		}
+		job.getEmployer().hireEmployee(this, job); // Make employer associated with the selected job to hire the person (sets job field and adds person to the employer's set of employees).
 	}
 
-	// Method to allow person to search through the list of jobs and accept one
+	// Method to allow person to search through the list of jobs and accept one. If on the job search is turned on, currently employed individuals can move to different jobs.
 	public void searchForJob() {
-		List<Job> sampledJobList = Helpers.pickNRandomJobs(model.getJobList(), searchIntensity); // Sample n = searchIntensity jobs from all available. This produces a list of jobs available to this person.
+		List<Job> sampledJobList;
+		if (Parameters.SEARCH_INTENSITY) {
+			sampledJobList = Helpers.pickNRandomJobs(model.getJobList(), searchIntensity); // Sample n = searchIntensity jobs from all available. This produces a list of jobs available to this person.
+		} else {
+			sampledJobList = model.getJobList();
+		}
 		if (sampledJobList.size() > 0) {
-			Map<Job, Double> utilityOfSampledJobsMap = calculateUtilityOfListOfJobs(sampledJobList); // A map of job - utility combinations for jobs sampled in the previous step
+			Map<Job, Double> utilityOfSampledJobsMap = calculateUtilityOfListOfJobs(sampledJobList); // A map of job - utility combinations for jobs sampled in the previous step.
 			Job selectedJob = findJobWithHighestUtility(utilityOfSampledJobsMap); // Choose the job providing maximum utility to the person, from the list of sampled jobs.
-			this.updateEmploymentVariables(selectedJob); // Set person's job and wage
-			selectedJob.getEmployer().hireEmployee(this);
-			model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers
+			if (job.getEmployer() != null && Parameters.ON_THE_JOB_SEARCH) {
+				if (Parameters.evaluateUtilityFunction(health, selectedJob.getWage()) > Parameters.evaluateUtilityFunction(health, job.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
+					updateEmployment(selectedJob); // Set person's job.
+					model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers.
+					setFlagChangedJobs(true); // Record the fact that employed individual changed jobs by setting flagChangedJobs to true.
+				}
+			} else {
+				updateEmployment(selectedJob); // Set person's job
+				model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers
+			}
+
 		}
 	}
 
 	public void leaveJob() {
+		try {
+			this.job.getEmployer().removeEmployee(this);
+			removeJob();
+		} catch (NullPointerException nullPointerException) {
+			System.out.println("Null pointer exception. Individual " + this.getKey().getId() + " tried to leave a job, but was already unemployed." );
+		}
+
+	}
+
+	public void removeJob() {
 		Job noJob = new Job(null, 0., 0.);
-		this.updateEmploymentVariables(noJob);
+		this.job = noJob;
 	}
 
 	// Method to calculate a utility of each job on the list. Returns a job - utility mapping.

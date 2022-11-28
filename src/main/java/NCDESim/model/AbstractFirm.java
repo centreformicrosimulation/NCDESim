@@ -102,14 +102,19 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         profit = calculateProfit();
     }
 
-    public void hireEmployee(Person employee) {
+    public void hireEmployee(Person employee, Job job) {
+        employee.setJob(job);
         getEmployeesSet().add(employee); // Add employee (Person) to a set of employees of a firm
+    }
+
+    public void removeEmployee(Person employee) {
+        getEmployeesSet().remove(employee);
     }
 
     public void removeAllEmployees() {
         // Iterate through all employees instead of simply clearing the employees set because person values should be updated
         for (Person employee : employeesSet) {
-            employee.leaveJob();
+            employee.removeJob();
         }
         getEmployeesSet().clear();
     }
@@ -118,7 +123,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         double profit = 0;
         double unitCostOfAmenity = amenity * costOfAmenity; // Note that this is per employee
         for (Person employee : employeesSet) {
-            profit += employee.getProductivity() - employee.getWage() - unitCostOfAmenity;
+            profit += employee.getProductivity() - employee.getJob().getWage() - unitCostOfAmenity;
         }
         return profit;
     }

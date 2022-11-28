@@ -14,6 +14,7 @@ import microsim.event.EventGroup;
 import microsim.event.EventListener;
 import microsim.event.Order;
 import microsim.gui.GuiUtils;
+import microsim.gui.plot.ScatterplotSimulationPlotter;
 import microsim.gui.plot.TimeSeriesSimulationPlotter;
 import microsim.statistics.CrossSection;
 import microsim.statistics.functions.MeanArrayFunction;
@@ -46,9 +47,11 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 	Set<JInternalFrame> updateChartSet; // Charts added to this set will be refreshed automatically
 	Set<JComponent> tabSet; // Charts are added to tabs in this set
 
-	private TimeSeriesSimulationPlotter csAgePlotter, csHealthPlotter, csWagePlotter, csUtilityPlotter, averageAgePlotter,
-			averageWagePlotter, averageHealthPlotter, averageAmenitiesPlotter, averageUtilityPlotter, averageProfitPlotter,
+	private TimeSeriesSimulationPlotter csAgePlotter, csHealthPlotter, csWagePlotter, csUtilityPlotter, csAmenitiesPlotter, averageAgePlotter,
+			averageWagePlotter, averageEmployedPlotter, averageHealthPlotter, averageFirmAmenitiesPlotter, averageIndividualAmenitiesPlotter, averageUtilityPlotter, averageProfitPlotter,
 			averageSizePlotter, populationPlotter;
+
+	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth;
 
 	public NCDESimObserver(SimulationManager manager, SimulationCollectorManager collectorManager) {
 		super(manager, collectorManager);
@@ -87,66 +90,97 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			tabSet = new LinkedHashSet<JComponent>();		//Set of all JInternalFrames each having a tab.  Each tab frame will potentially contain more than one cha
 
 			/**
-			 * AGE
+			 * NUMBER OF INDIVIDUALS AND FIRMS
+			 */
+			CrossSection.Double populationIndividualsCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Count);
+			CrossSection.Double populationFirmsCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Count);
+			populationPlotter = new TimeSeriesSimulationPlotter("Number of individuals and firms", "Number");
+			populationPlotter.addSeries("Individuals", new SumArrayFunction.Double(populationIndividualsCS));
+			populationPlotter.addSeries("Firms", new SumArrayFunction.Double(populationFirmsCS));
+			addChart(populationPlotter, "Population");
+
+			/**
+			 * AGE (INDIVIDUALS)
 			 */
 			csAgePlotter = new TimeSeriesSimulationPlotter("Agents' age", "Age");
-			for(Person person : model.getIndividuals()){
-				csAgePlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Age));
+			for(Person person : model.getIndividuals()) {
+				csAgePlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.DoubleVariables.Age));
 			}
 
-
-			CrossSection.Double ageCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Age);				//Obtain age values by IDoubleSource interface...
+			CrossSection.Double ageCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Age);				//Obtain age values by IDoubleSource interface...
 			averageAgePlotter = new TimeSeriesSimulationPlotter("Average age", "Age");
 			averageAgePlotter.addSeries("Average", new MeanArrayFunction(ageCS));
-			addChart(averageAgePlotter, "Avg. age");
+			addChart(averageAgePlotter, "IND Avg. age");
 
 			/**
-			 * HEALTH
+			 * EMPLOYMENT (INDIVIDUALS)
+			 */
+			CrossSection.Integer employedCS = new CrossSection.Integer(model.getIndividuals(), Person.IntegerVariables.IsEmployed);
+			CrossSection.Integer changedJobsCS = new CrossSection.Integer(model.getIndividuals(), Person.IntegerVariables.ChangedJobs);
+			averageEmployedPlotter = new TimeSeriesSimulationPlotter("Employment statistics", "Share");
+			averageEmployedPlotter.addSeries("Employed", new MeanArrayFunction(employedCS));
+			averageEmployedPlotter.addSeries("Changed jobs", new MeanArrayFunction(changedJobsCS));
+			addChart(averageEmployedPlotter, "IND Employment stats");
+
+			/**
+			 * HEALTH (INDIVIDUALS)
 			 */
 			csHealthPlotter = new TimeSeriesSimulationPlotter("Agents' health", "Health");
-			for(Person person : model.getIndividuals()){
-				csHealthPlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Health));
+			for(Person person : model.getIndividuals()) {
+				csHealthPlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.DoubleVariables.Health));
 			}
 
-
-			CrossSection.Double healthCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Health);
+			CrossSection.Double healthCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Health);
 			averageHealthPlotter = new TimeSeriesSimulationPlotter("Average health", "Health");
 			averageHealthPlotter.addSeries("Average", new MeanArrayFunction(healthCS));
-			addChart(averageHealthPlotter, "Avg. health");
+			addChart(averageHealthPlotter, "IND Avg. health");
 
 			/**
-			 * WAGE
+			 * AMENITIES (INDIVIDUALS)
+			 */
+			csAmenitiesPlotter = new TimeSeriesSimulationPlotter("Agents' amenities", "Amenities");
+			for (Person person : model.getIndividuals()) {
+				csAmenitiesPlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.DoubleVariables.Amenities));
+			}
+
+			CrossSection.Double amenitiesCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Amenities);
+			averageIndividualAmenitiesPlotter = new TimeSeriesSimulationPlotter("Average amenities", "Amenities");
+			averageIndividualAmenitiesPlotter.addSeries("Average", new MeanArrayFunction(amenitiesCS));
+			addChart(averageIndividualAmenitiesPlotter, "IND Avg. amenities");
+
+			/**
+			 * WAGE (INDIVIDUALS)
 			 */
 			csWagePlotter = new TimeSeriesSimulationPlotter("Agents' wage", "Wage");
-			for(Person person : model.getIndividuals()){
-				csWagePlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Wage));
+			for(Person person : model.getIndividuals()) {
+				csWagePlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.DoubleVariables.Wage));
 			}
 
-			CrossSection.Double wageCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Wage);
+			CrossSection.Double wageCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Wage);
 			averageWagePlotter = new TimeSeriesSimulationPlotter("Average wage", "Wage");
 			averageWagePlotter.addSeries("Average", new MeanArrayFunction(wageCS));
-			addChart(averageWagePlotter, "Avg. wage");
+			addChart(averageWagePlotter, "IND Avg. wage");
 
 			/**
-			 * UTILITY
+			 * UTILITY (INDIVIDUALS)
 			 */
 			csUtilityPlotter = new TimeSeriesSimulationPlotter("Agents' utility", "Utility");
-			for(Person person : model.getIndividuals()){
-				csUtilityPlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.Variables.Utility));
+			for(Person person : model.getIndividuals()) {
+				csUtilityPlotter.addSeries("Person " + person.getKey().getId(), new MultiTraceFunction.Double(person, Person.DoubleVariables.Utility));
 			}
 
-			CrossSection.Double utilityCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Utility);
+			CrossSection.Double utilityCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Utility);
 			averageUtilityPlotter = new TimeSeriesSimulationPlotter("Average utility", "Utility");
 			averageUtilityPlotter.addSeries("Average", new MeanArrayFunction(utilityCS));
-			addChart(averageUtilityPlotter, "Avg. utility");
+			addChart(averageUtilityPlotter, "IND Avg. utility");
 
 			/**
 			 * AMENITIES (FIRM)
 			 */
-			CrossSection.Double amenitiesCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.AmenitiesLevel);
-			averageAmenitiesPlotter = new TimeSeriesSimulationPlotter("Average amenities", "Amenities");
-			averageAmenitiesPlotter.addSeries("Average", new MeanArrayFunction(wageCS));
-			addChart(averageAmenitiesPlotter, "Avg. amenities");
+			CrossSection.Double amenitiesFirmCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.AmenitiesLevel);
+			averageFirmAmenitiesPlotter = new TimeSeriesSimulationPlotter("Average amenities", "Amenities");
+			averageFirmAmenitiesPlotter.addSeries("Average", new MeanArrayFunction(amenitiesFirmCS));
+			addChart(averageFirmAmenitiesPlotter, "FIRM Avg. amenities");
 
 			/**
 			 * PROFITS (FIRM)
@@ -154,7 +188,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			CrossSection.Double profitCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Profit);
 			averageProfitPlotter = new TimeSeriesSimulationPlotter("Average profit", "Profit");
 			averageProfitPlotter.addSeries("Average", new MeanArrayFunction(profitCS));
-			addChart(averageProfitPlotter, "Avg. profit");
+			addChart(averageProfitPlotter, "FIRM Avg. profit");
 
 			/**
 			 * SIZE (FIRM)
@@ -162,26 +196,28 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			CrossSection.Double sizeCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Size);
 			averageSizePlotter = new TimeSeriesSimulationPlotter("Average size", "Size");
 			averageSizePlotter.addSeries("Average", new MeanArrayFunction(sizeCS));
-			addChart(averageSizePlotter, "Avg. size");
-
-			/**
-			 * NUMBER OF INDIVIDUALS AND FIRMS
-			 */
-			CrossSection.Double populationIndividualsCS = new CrossSection.Double(model.getIndividuals(), Person.Variables.Count);
-			CrossSection.Double populationFirmsCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Count);
-			populationPlotter = new TimeSeriesSimulationPlotter("Number of individuals and firms", "Number");
-			populationPlotter.addSeries("Individuals", new SumArrayFunction.Double(populationIndividualsCS));
-			populationPlotter.addSeries("Firms", new SumArrayFunction.Double(populationFirmsCS));
-			addChart(populationPlotter, "Population");
+			addChart(averageSizePlotter, "FIRM Avg. size");
 
 
 			// Add individual-level graphs
 			if (showIndividualGraphs) {
-				addChart(csAgePlotter, "Age");
-				addChart(csHealthPlotter, "Health");
-				addChart(csWagePlotter, "Wage");
-				addChart(csUtilityPlotter, "Utility");
+				addChart(csAgePlotter, "IND Age");
+				addChart(csHealthPlotter, "IND Health");
+				addChart(csWagePlotter, "IND Wage");
+				addChart(csUtilityPlotter, "IND Utility");
+				addChart(csAmenitiesPlotter, "IND Amenities");
 			}
+
+			/**
+			 * SCATTERPLOTS (INDIVIDUALS)
+			 */
+			scatterIndividualHealthUtility = new ScatterplotSimulationPlotter("Health and utility", "Health", "Utility");
+			scatterIndividualHealthUtility.addSeries("Health and utility", new MeanArrayFunction(healthCS), new MeanArrayFunction(utilityCS));
+			addChart(scatterIndividualHealthUtility, "IND CORR Health / Utility");
+
+			scatterIndividualAmenityHealth = new ScatterplotSimulationPlotter("Health and amenity", "Amenity", "Health");
+			scatterIndividualAmenityHealth.addSeries("Health and amenity", new MeanArrayFunction(amenitiesCS), new MeanArrayFunction(healthCS));
+			addChart(scatterIndividualAmenityHealth, "IND CORR Health / Amenity");
 
 			//-------------------------------------------------------------------------------------------------------
 			//
