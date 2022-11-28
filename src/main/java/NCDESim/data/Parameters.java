@@ -25,6 +25,7 @@ public class Parameters {
 
     // Values of parameters used by other simulated objects
     public static final double COST_OF_AMENITY_MULTIPLIER = 0.01; // Cost of providing amenity is per worker and depends on the level of amenity multiplied by this multiplier.
+    public static final boolean AMENITY_COST_FLOOR_AT_ZERO = false; // Set to true to restrict the firm's cost of providing amenity from the bottom at zero. If false, firms providing negative amenity (dis-amenity) increase their profits.
     public static final int MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON = 10; // Search intensity. Defines the maximum number of jobs a person can sample.
 
 

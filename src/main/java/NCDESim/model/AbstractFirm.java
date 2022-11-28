@@ -23,7 +23,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     @Transient
     private TreeSet<Person> employeesSet; // Set of employees of a firm
     private double amenity; // Level of amenities provided by firm, between <-1;1>
-    private double costOfAmenity; // Cost of providing amenity
+    private double costOfAmenity; // Cost of providing amenity per employee
     private double wage; // Randomly drawn hourly wage offered by a firm
     private double profit; // Sum of (productivity per worker - wage) - max(0, cost * amenity)
     private int desiredSize; // Size (number of employees) that firm wants to achieve.
@@ -121,8 +121,9 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         return profit;
     }
     public double calculateCostOfAmenity() {
-        return amenity * Parameters.COST_OF_AMENITY_MULTIPLIER; // Calculate unrestricted cost of providing amenity. This implies that providing a dis-amenity increases firm's profit.
-    //    return Math.max(0, amenity* Parameters.COST_OF_AMENITY_MULTIPLIER); // Calculate cost of providing the amenity with a floor at zero
+        if (Parameters.AMENITY_COST_FLOOR_AT_ZERO) {
+            return Math.max(0, amenity * Parameters.COST_OF_AMENITY_MULTIPLIER); // Calculate cost of providing the amenity with a floor at zero
+        } else return amenity * Parameters.COST_OF_AMENITY_MULTIPLIER; // Calculate unrestricted cost of providing amenity. This implies that providing a dis-amenity increases firm's profit.
     }
 
     public void postJobOffers() {

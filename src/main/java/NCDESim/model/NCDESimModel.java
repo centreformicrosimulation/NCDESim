@@ -28,8 +28,10 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     boolean fixRandomSeed = true;
     @GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
     Long seedIfFixed = 1166517026L;
-    @GUIparameter(description = "Set the number of agents to create at launch")
+    @GUIparameter(description = "Set the number of persons to create at launch")
     Integer numberOfAgents = 100;
+    @GUIparameter(description = "Set the number of persons to create each year")
+    Integer perYearNumberOfPersons = 10;
     @GUIparameter(description = "Set the number of firms to create at launch")
     Integer initialNumberOfFirms = 100;
     @GUIparameter(description = "Set the number of firms to create each year")
@@ -68,6 +70,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         modelEvents.addEvent(this, Processes.BeginNewYear); // Increment model time variable by 1
         modelEvents.addCollectionEvent(individuals, Person.Processes.BeginNewYear); // Update values of individuals' lagged variables
 
+        modelEvents.addEvent(this, Processes.AddNewPersons);
         modelEvents.addEvent(this, Processes.AddNewFirms);
 
         //	modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
@@ -94,6 +97,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
     public enum Processes {
         AddNewFirms,
+        AddNewPersons,
         JobSearch,
         RemoveFirms,
         End,
@@ -103,10 +107,14 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
             case AddNewFirms -> addNewFirms();
+            case AddNewPersons -> addNewPersons();
             case JobSearch -> jobSearch();
             case RemoveFirms -> removeFirms();
             case End -> getEngine().end();
-            case BeginNewYear -> time++;
+            case BeginNewYear -> {
+                time++;
+                clearJobList();
+            }
         }
     }
 
@@ -168,6 +176,13 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         firms.addAll(listOfRandomFirms);
     }
 
+    protected void addNewPersons() {
+        int numberOfNewIndividualsToAdd = perYearNumberOfPersons;
+        for (int i = 0; i < numberOfNewIndividualsToAdd; i++) {
+            individuals.add(new Person());
+        }
+    }
+
     private void jobSearch() {
         List<Person> individualsLookingForJobs; // According to the documentation it is not possible to have filters in the yearly schedule directly. Job search is therefore all handled here, instead of splitting the updating of the filtered list and job search into two parts.
 
@@ -179,13 +194,18 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         individualsLookingForJobs.forEach(Person::searchForJob); // Call searchForJob method on each person on the list of individuals lookingForJobs
     }
 
+    private void clearJobList() {
+        jobList.clear();
+    }
+
     private void removeFirms() {
         List<AbstractFirm> firmsToRemove = new ArrayList<>();
         CollectionUtils.select(getFirms(), new FirmRemovalFilter<>(), firmsToRemove);
         for (AbstractFirm firm : firmsToRemove) {
             firm.prepareForRemoval();
+            firms.remove(firm);
         }
-        firms.removeAll(firmsToRemove); // Remove all firms which meet criteria specified in the FirmRemovalFilter
+     //   firms.removeAll(firmsToRemove); // Remove all firms which meet criteria specified in the FirmRemovalFilter
     }
 
     protected void createAuxiliaryObjects() {

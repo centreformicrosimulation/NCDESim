@@ -17,6 +17,7 @@ import microsim.gui.GuiUtils;
 import microsim.gui.plot.ScatterplotSimulationPlotter;
 import microsim.gui.plot.TimeSeriesSimulationPlotter;
 import microsim.statistics.CrossSection;
+import microsim.statistics.TimeSeries;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.MultiTraceFunction;
 import NCDESim.model.Person;
@@ -90,7 +91,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			tabSet = new LinkedHashSet<>();		//Set of all JInternalFrames each having a tab.  Each tab frame will potentially contain more than one cha
 
 			/*
-			 * NUMBER OF INDIVIDUALS AND FIRMS
+			 * NUMBER OF INDIVIDUALS, FIRMS
 			 */
 			CrossSection.Double populationIndividualsCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Count);
 			CrossSection.Double populationFirmsCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Count);
