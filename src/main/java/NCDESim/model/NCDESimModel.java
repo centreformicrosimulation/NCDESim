@@ -14,13 +14,14 @@ import microsim.event.EventGroup;
 import microsim.event.EventListener;
 import microsim.event.Order;
 import microsim.event.SingleTargetEvent;
+import microsim.statistics.IDoubleSource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.util.*;
 
 @Data
-public class NCDESimModel extends AbstractSimulationManager implements EventListener {
+public class NCDESimModel extends AbstractSimulationManager implements EventListener, IDoubleSource {
 
     //Parameters of the model
     private final static Logger log = Logger.getLogger(NCDESimModel.class);
@@ -29,7 +30,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
     Long seedIfFixed = 1166517026L;
     @GUIparameter(description = "Set the number of persons to create at launch")
-    Integer numberOfAgents = 100;
+    Integer numberOfPersons = 100;
     @GUIparameter(description = "Set the number of persons to create each year")
     Integer perYearNumberOfPersons = 10;
     @GUIparameter(description = "Set the number of firms to create at launch")
@@ -89,6 +90,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         log.debug("Model schedule created");
 
     }
+    
 
 
     // ---------------------------------------------------------------------
@@ -119,6 +121,21 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     }
 
     // ---------------------------------------------------------------------
+    // IDoubleSource
+    // ---------------------------------------------------------------------
+    public enum Variables{
+        NumberOfJobs;
+    }
+    
+    @Override
+    public double getDoubleValue(Enum<?> variable) {
+        return switch ((Variables) variable) {
+
+            case NumberOfJobs -> getJobList().size();
+        };
+    }
+
+    // ---------------------------------------------------------------------
     // Own methods
     // ---------------------------------------------------------------------
 
@@ -127,7 +144,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		Create a collection of individuals to simulate
 		 */
         individuals = new LinkedList<>();
-        for (int i = 0; i < numberOfAgents; i++) {
+        for (int i = 0; i < numberOfPersons; i++) {
             individuals.add(new Person());
         }
 

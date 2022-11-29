@@ -17,6 +17,8 @@ import microsim.gui.GuiUtils;
 import microsim.gui.plot.ScatterplotSimulationPlotter;
 import microsim.gui.plot.TimeSeriesSimulationPlotter;
 import microsim.statistics.CrossSection;
+import microsim.statistics.IDoubleSource;
+import microsim.statistics.Series;
 import microsim.statistics.TimeSeries;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.MultiTraceFunction;
@@ -50,7 +52,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 
 	private TimeSeriesSimulationPlotter csAgePlotter, csHealthPlotter, csWagePlotter, csUtilityPlotter, csAmenitiesPlotter, averageAgePlotter,
 			averageWagePlotter, averageEmployedPlotter, averageHealthPlotter, averageFirmAmenitiesPlotter, averageIndividualAmenitiesPlotter, averageUtilityPlotter, averageProfitPlotter,
-			averageSizePlotter, populationPlotter;
+			averageSizePlotter, populationPlotter, numberOfJobsPlotter;
 
 	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth;
 
@@ -122,6 +124,14 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageEmployedPlotter.addSeries("Employed", new MeanArrayFunction(employedCS));
 			averageEmployedPlotter.addSeries("Changed jobs", new MeanArrayFunction(changedJobsCS));
 			addChart(averageEmployedPlotter, "IND Employment stats");
+
+			/*
+			NUMBER OF JOBS ADVERTISED
+			 */
+			numberOfJobsPlotter = new TimeSeriesSimulationPlotter("Number of advertised jobs", "Jobs");
+			numberOfJobsPlotter.addSeries("Jobs", new MultiTraceFunction.Double(model, NCDESimModel.Variables.NumberOfJobs));
+			addChart(numberOfJobsPlotter, "MODEL Number of jobs");
+
 
 			/*
 			 * HEALTH (INDIVIDUALS)

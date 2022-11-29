@@ -11,13 +11,15 @@ public class NCDESimMultiRun extends MultiRun {
 	// Experimental design usually involves one of the following:
 	// (a) Running the simulation a given number of times, without changing the values of the parameters (but changing the random number seed)
 	// (b) Spanning over the values of the parameters, keeping the random number seed fixed
-	// In the example, the simulation is repeated a number of times equal to numberOfRepeatedRuns for each population size of agents, 	// specified by the parameter maxNumberOfAgents.
+	// In the code below, the simulation is repeated a number of times equal to numberOfRepeatedRuns for each population size of agents, 	// specified by the parameter maxNumberOfAgents.
 
 	public static boolean executeWithGui = true;
 
 	// Define the parameters that specify the experiment, and assign an initial value (used in the first simulation)
 	private Long counter = 1L;
-	private Integer numberOfAgents = 10;
+	private Integer numberOfPersons = 10;
+
+	private double shareOfNewFirmsCloned = 0;
 
 	// Define maximum values for the experiment (used in the last simulation)
 	private static Integer numberOfRepeatedRuns = 5;		//Set default number of repeated runs
@@ -40,7 +42,7 @@ public class NCDESimMultiRun extends MultiRun {
 		engine.setup();
 
 		if (executeWithGui)
-			new MultiRunFrame(experimentBuilder, "NCDESim MultiRun", maxNumberOfRuns);
+			new MultiRunFrame(experimentBuilder, "NCDESim MultiRun", maxNumberOfRuns).setResizable(true);
 		else
 			experimentBuilder.start();
 	}
@@ -57,26 +59,30 @@ public class NCDESimMultiRun extends MultiRun {
 		//No need to add observer if running in batch mode
 
 		// Overwrite the default values of the parameters of the simulation
-		model.setNumberOfAgents(numberOfAgents);
+		collector.setExportToCSV(true); // Write outputs to CSV
+		model.setNumberOfPersons(numberOfPersons);
+		model.setShareOfNewFirmsCloned(shareOfNewFirmsCloned);
 	}
 
 	@Override
 	public boolean nextModel() {
 		// Update the values of the parameters for the next experiment
 		counter++;
+		// Increase the number of persons and reset parameters and counter
 		if(counter > numberOfRepeatedRuns) {
-			numberOfAgents *= 10;			//Increase the number of agents by a factor of 10 for the next experiment
-			counter = 1L;					//Reset counter
+			numberOfPersons *= 10;			// Increase the number of agents by a factor of 10 for the next experiment
+			shareOfNewFirmsCloned += 0.2;	// Increase the share of cloned firms among new entrants
+			counter = 1L;					// Reset counter
 		}
 
 		// Define the continuation condition
 		//Stop when the numberOfAgents goes above maxNumberOfAgents
-		return numberOfAgents < maxNumberOfAgents;
+		return numberOfPersons < maxNumberOfAgents;
 	}
 
 	@Override
 	public String setupRunLabel() {
-		return numberOfAgents.toString() + " agents, count: " + counter.toString();
+		return numberOfPersons.toString() + " persons, share of new firms cloned: " + shareOfNewFirmsCloned + " run count: " + counter.toString();
 	}
 
 
