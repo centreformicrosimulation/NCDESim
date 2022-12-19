@@ -47,7 +47,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Double endTime = 100.;
     @GUIparameter(description = "Multiplier on the cost of amenity provided by firms")
     Double amenityCostMultiplier = 0.01;
-
+    @GUIparameter(description = "Health decay parameter lambda")
+    Double lambda = 0.1;
     private int time;
     private List<Person> individuals;
     private Set<AbstractFirm> firms;

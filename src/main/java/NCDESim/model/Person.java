@@ -4,6 +4,7 @@ import NCDESim.algorithms.Helpers;
 import NCDESim.data.Parameters;
 import NCDESim.model.objects.Job;
 import lombok.*;
+import microsim.annotation.GUIparameter;
 import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
 import microsim.statistics.IDoubleSource;
@@ -24,7 +25,6 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	private PanelEntityKey key;
 	@Transient
 	private static long idCounter = 1;
-	private double alpha;
 	private int age;
 	private double health, health_L1;
 	private double productivity;
@@ -41,9 +41,8 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		super();
 
 		this.key = new PanelEntityKey(idCounter++);
-		this.alpha = SimulationEngine.getRnd().nextDouble() * 0.1; // Value of parameter alpha
 		this.age = SimulationEngine.getRnd().nextInt(100); // Each person has a random age between 0 and 100
-		this.health = SimulationEngine.getRnd().nextDouble() * 2 - 1; // Each person has a random health level between -1 and 1
+		this.health = SimulationEngine.getRnd().nextDouble(); // Each person has a random health level between 0 and 1
 		this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
 		this.job = new Job(null, 0., 0.); // Job of the person
 		this.searchIntensity = SimulationEngine.getRnd().nextInt(Parameters.MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON)+1; // Only used if turned on in Parameters
@@ -142,8 +141,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 
 	// Method to calculate the level of health
 	public void updateHealth() {
-	//	health = health_L1 + alpha * job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
-		health = health_L1 + 1 * job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
+		health = health_L1 + model.getLambda() + job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
 	}
 
 	public void updateUtility() {

@@ -22,7 +22,7 @@ public class SimulationStatistics {
 
     // Model parameters
     private int parameter_numberOfPersonsInitial, parameter_perYearNumberOfPersons, parameter_numberOfFirmsInitial, parameter_perYearNumberOfFirms;
-    private double parameter_shareOfNewFirmsCloned, parameter_endTime, parameter_amenityCostMultiplier;
+    private double parameter_shareOfNewFirmsCloned, parameter_endTime, parameter_amenityCostMultiplier, parameter_healthDecayLambda;
 
     // Aggregate model statistics
     private int outcome_numberOfPersons, outcome_numberOfFirms, outcome_numberOfAdvertisedJobs;
