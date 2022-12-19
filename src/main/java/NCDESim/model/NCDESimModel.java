@@ -4,7 +4,10 @@ import NCDESim.algorithms.Helpers;
 import NCDESim.data.Parameters;
 import NCDESim.data.filters.FirmRemovalFilter;
 import NCDESim.data.filters.IndividualCanLookForJobFilter;
+import NCDESim.data.filters.PersonRemovalFilter;
+import NCDESim.experiment.NCDESimCollector;
 import NCDESim.model.objects.Job;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import microsim.annotation.GUIparameter;
 import microsim.data.db.DatabaseUtils;
@@ -15,13 +18,14 @@ import microsim.event.EventListener;
 import microsim.event.Order;
 import microsim.event.SingleTargetEvent;
 import microsim.statistics.IDoubleSource;
+import microsim.statistics.IIntSource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.util.*;
 
 @Data
-public class NCDESimModel extends AbstractSimulationManager implements EventListener, IDoubleSource {
+public class NCDESimModel extends AbstractSimulationManager implements EventListener, IDoubleSource, IIntSource {
 
     //Parameters of the model
     private final static Logger log = Logger.getLogger(NCDESimModel.class);
@@ -41,8 +45,9 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Double shareOfNewFirmsCloned = 0.75;
     @GUIparameter(description = "Set the time at which the simulation will terminate")
     Double endTime = 100.;
+    @GUIparameter(description = "Multiplier on the cost of amenity provided by firms")
+    Double amenityCostMultiplier = 0.01;
 
-    //Objects
     private int time;
     private List<Person> individuals;
     private Set<AbstractFirm> firms;
@@ -83,6 +88,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.Update); // Update firms' state variables
 
         modelEvents.addEvent(this, Processes.RemoveFirms); // Remove firms which meet criteria specified in FirmRemovalFilter from the simulation
+        modelEvents.addEvent(this, Processes.RemovePersons); // Remove persons who meet criteria specified in PersonRemovalFilter from the simulation
 
         getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
         getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.End), endTime, Order.AFTER_ALL.getOrdering());
@@ -102,6 +108,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         AddNewPersons,
         JobSearch,
         RemoveFirms,
+        RemovePersons,
         End,
         BeginNewYear
     }
@@ -112,6 +119,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
             case AddNewPersons -> addNewPersons();
             case JobSearch -> jobSearch();
             case RemoveFirms -> removeFirms();
+            case RemovePersons -> removePersons();
             case End -> getEngine().end();
             case BeginNewYear -> {
                 time++;
@@ -119,17 +127,33 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
             }
         }
     }
+    // ---------------------------------------------------------------------
+    // IIntSource
+    // ---------------------------------------------------------------------
+    public enum IntVariables {
+        NumberOfFirms,
+        NumberOfPersons,
+    }
 
+    @Override
+    public int getIntValue(Enum<?> variable) {
+        return switch ((IntVariables) variable) {
+
+            case NumberOfFirms -> getFirms().size();
+            case NumberOfPersons -> getIndividuals().size();
+        };
+    }
     // ---------------------------------------------------------------------
     // IDoubleSource
     // ---------------------------------------------------------------------
-    public enum Variables{
-        NumberOfJobs;
+    public enum DoubleVariables {
+        NumberOfJobs,
+
     }
     
     @Override
     public double getDoubleValue(Enum<?> variable) {
-        return switch ((Variables) variable) {
+        return switch ((DoubleVariables) variable) {
 
             case NumberOfJobs -> getJobList().size();
         };
@@ -218,11 +242,19 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     private void removeFirms() {
         List<AbstractFirm> firmsToRemove = new ArrayList<>();
         CollectionUtils.select(getFirms(), new FirmRemovalFilter<>(), firmsToRemove);
-        for (AbstractFirm firm : firmsToRemove) {
+        Iterator<AbstractFirm> itr = firmsToRemove.iterator();
+        while (itr.hasNext()) {
+            AbstractFirm firm = itr.next();
             firm.prepareForRemoval();
             firms.remove(firm);
+            itr.remove();
         }
-     //   firms.removeAll(firmsToRemove); // Remove all firms which meet criteria specified in the FirmRemovalFilter
+    }
+
+    private void removePersons() {
+        ArrayList<Person> personsToRemove = new ArrayList<>();
+        CollectionUtils.select(getIndividuals(), new PersonRemovalFilter<>(), personsToRemove);
+        individuals.removeAll(personsToRemove);
     }
 
     protected void createAuxiliaryObjects() {

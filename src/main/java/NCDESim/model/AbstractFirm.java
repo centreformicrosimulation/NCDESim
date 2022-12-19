@@ -122,8 +122,8 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     }
     public double calculateCostOfAmenity() {
         if (Parameters.AMENITY_COST_FLOOR_AT_ZERO) {
-            return Math.max(0, amenity * Parameters.COST_OF_AMENITY_MULTIPLIER); // Calculate cost of providing the amenity with a floor at zero
-        } else return amenity * Parameters.COST_OF_AMENITY_MULTIPLIER; // Calculate unrestricted cost of providing amenity. This implies that providing a dis-amenity increases firm's profit.
+            return Math.max(0, amenity * model.getAmenityCostMultiplier()); // Calculate cost of providing the amenity with a floor at zero
+        } else return amenity * model.getAmenityCostMultiplier(); // Calculate unrestricted cost of providing amenity. This implies that providing a dis-amenity increases firm's profit.
     }
 
     public void postJobOffers() {

@@ -17,9 +17,6 @@ import microsim.gui.GuiUtils;
 import microsim.gui.plot.ScatterplotSimulationPlotter;
 import microsim.gui.plot.TimeSeriesSimulationPlotter;
 import microsim.statistics.CrossSection;
-import microsim.statistics.IDoubleSource;
-import microsim.statistics.Series;
-import microsim.statistics.TimeSeries;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.MultiTraceFunction;
 import NCDESim.model.Person;
@@ -129,7 +126,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			NUMBER OF JOBS ADVERTISED
 			 */
 			numberOfJobsPlotter = new TimeSeriesSimulationPlotter("Number of advertised jobs", "Jobs");
-			numberOfJobsPlotter.addSeries("Jobs", new MultiTraceFunction.Double(model, NCDESimModel.Variables.NumberOfJobs));
+			numberOfJobsPlotter.addSeries("Jobs", new MultiTraceFunction.Double(model, NCDESimModel.DoubleVariables.NumberOfJobs));
 			addChart(numberOfJobsPlotter, "MODEL Number of jobs");
 
 

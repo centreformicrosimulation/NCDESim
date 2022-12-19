@@ -1,6 +1,7 @@
 package NCDESim.data;
 
 import NCDESim.algorithms.Helpers;
+import NCDESim.data.enums.UtilityFunctions;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -20,20 +21,30 @@ public class Parameters {
     public static final int COLLECTOR_ORDERING = Order.AFTER_ALL.getOrdering()-1;
     public static final int OBSERVER_ORDERING = Order.AFTER_ALL.getOrdering();
 
+    // Parameters
+    public static final int PERSON_REMOVAL_AGE = 60; // Remove persons from the simulation when they reach this age
+    public static final UtilityFunctions UTILITY_FUNCTION = UtilityFunctions.CobbDouglas;
+    public static final double CobbDouglasUtilityTFP = 1; // Total Factor Productivity for the CB Utility
+    public static final double CobbDouglasUtilityAlpha = 0.5; // Parameter Alpha for the CB Utility
+    public static final double CobbDouglasUtilityBeta = 1 - CobbDouglasUtilityAlpha; // Parameter Beta for the CB Utility
+    public static final double UtilityFixedCostOfWork = 0.1;
+
     // Graphs
     public static final int SHOW_INDIVIDUAL_GRAPHS_NUMBER_OBSERVATIONS = 100; // Individual-level graphs will be show if simulated number of observations is smaller or equal to this value
-
-    // Values of parameters used by other simulated objects
-    public static final double COST_OF_AMENITY_MULTIPLIER = 0.01; // Cost of providing amenity is per worker and depends on the level of amenity multiplied by this multiplier.
     public static final boolean AMENITY_COST_FLOOR_AT_ZERO = false; // Set to true to restrict the firm's cost of providing amenity from the bottom at zero. If false, firms providing negative amenity (dis-amenity) increase their profits.
     public static final int MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON = 10; // Search intensity. Defines the maximum number of jobs a person can sample.
-
 
     // Utility function and its parameters
 
     public static double evaluateUtilityFunction(double health, double wage) { // This utility function is used to calculate person's well-being. Job offers are evaluated according to the level of well-being they generate.
-        double utility = Helpers.asinh(health) + Helpers.asinh(wage); // Asinh transformed, but within the -1,1 range this is likely close to a linear function
-        return utility;
-    }
 
+        switch (UTILITY_FUNCTION) {
+            case CobbDouglas -> {
+                return CobbDouglasUtilityTFP * Math.pow(Math.max(health, 0), CobbDouglasUtilityAlpha) * Math.pow(wage, CobbDouglasUtilityBeta) - UtilityFixedCostOfWork;
+            }
+            default -> {
+                return 0;
+            }
+        }
+    }
 }
