@@ -141,7 +141,8 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 
 	// Method to calculate the level of health
 	public void updateHealth() {
-		health = health_L1 + model.getLambda() + job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
+	//	health = health_L1 - (model.getLambda() * age) + job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
+		health = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), age) - 1) + job.getAmenity()), 1);
 	}
 
 	public void updateUtility() {

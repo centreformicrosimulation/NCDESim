@@ -34,21 +34,21 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
     Long seedIfFixed = 1166517026L;
     @GUIparameter(description = "Set the number of persons to create at launch")
-    Integer numberOfPersons = 100;
+    Integer numberOfPersons = 1000;
     @GUIparameter(description = "Set the number of persons to create each year")
-    Integer perYearNumberOfPersons = 10;
+    Integer perYearNumberOfPersons = 100;
     @GUIparameter(description = "Set the number of firms to create at launch")
-    Integer initialNumberOfFirms = 100;
+    Integer initialNumberOfFirms = 160;
     @GUIparameter(description = "Set the number of firms to create each year")
-    Integer perYearNumberOfFirms = 10;
+    Integer perYearNumberOfFirms = 15;
     @GUIparameter(description = "Set the number of firms to create each year")
-    Double shareOfNewFirmsCloned = 0.75;
+    Double shareOfNewFirmsCloned = 0.50;
     @GUIparameter(description = "Set the time at which the simulation will terminate")
-    Double endTime = 100.;
+    Double endTime = 1000.;
     @GUIparameter(description = "Multiplier on the cost of amenity provided by firms")
     Double amenityCostMultiplier = 0.01;
     @GUIparameter(description = "Health decay parameter lambda")
-    Double lambda = 0.1;
+    Double lambda = 0.001;
     private int time;
     private List<Person> individuals;
     private Set<AbstractFirm> firms;
@@ -88,8 +88,9 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         modelEvents.addCollectionEvent(individuals, Person.Processes.Update); // Update persons' state variables
         modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.Update); // Update firms' state variables
 
+        modelEvents.addEvent(this, Processes.RemovePersons); // Remove persons who meet criteria specified in PersonRemovalFilter from the simulation. This should occur before firm removal, because it modifies the set of employees of a firm, and firm size = 0 is a condition for firm removal.
         modelEvents.addEvent(this, Processes.RemoveFirms); // Remove firms which meet criteria specified in FirmRemovalFilter from the simulation
-        modelEvents.addEvent(this, Processes.RemovePersons); // Remove persons who meet criteria specified in PersonRemovalFilter from the simulation
+        
 
         getEngine().getEventQueue().scheduleRepeat(modelEvents, 0., 0, 1.);
         getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.End), endTime, Order.AFTER_ALL.getOrdering());
@@ -255,7 +256,16 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     private void removePersons() {
         ArrayList<Person> personsToRemove = new ArrayList<>();
         CollectionUtils.select(getIndividuals(), new PersonRemovalFilter<>(), personsToRemove);
-        individuals.removeAll(personsToRemove);
+        Iterator<Person> itr = personsToRemove.iterator();
+        while (itr.hasNext()) {
+            Person person = itr.next();
+            if (person.getJob().getEmployer() != null) {
+                AbstractFirm firm = person.getJob().getEmployer();
+                firm.removeEmployee(person);
+            }
+            individuals.remove(person);
+            itr.remove();
+        }
     }
 
     protected void createAuxiliaryObjects() {

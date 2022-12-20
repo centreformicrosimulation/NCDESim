@@ -40,7 +40,7 @@ public class Parameters {
 
         switch (UTILITY_FUNCTION) {
             case CobbDouglas -> {
-                return CobbDouglasUtilityTFP * Math.pow(Math.max(health, 0), CobbDouglasUtilityAlpha) * Math.pow(wage, CobbDouglasUtilityBeta) - UtilityFixedCostOfWork;
+                return CobbDouglasUtilityTFP * Math.pow(health, CobbDouglasUtilityAlpha) * Math.pow(wage, CobbDouglasUtilityBeta);
             }
             default -> {
                 return 0;
