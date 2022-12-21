@@ -80,7 +80,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         modelEvents.addEvent(this, Processes.AddNewPersons);
         modelEvents.addEvent(this, Processes.AddNewFirms);
 
-        //	modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
+        modelEvents.addCollectionEvent(individuals, Person.Processes.Ageing);
         modelEvents.addCollectionEvent(firms, FirmTypeA.Processes.PostJobOffers);
 
         modelEvents.addEvent(this, Processes.JobSearch);
