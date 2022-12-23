@@ -177,6 +177,8 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		statistics.setParameter_endTime(model.getEndTime());
 		statistics.setParameter_amenityCostMultiplier(model.getAmenityCostMultiplier());
 		statistics.setParameter_healthDecayLambda(model.getLambda());
+		statistics.setParameter_onTheJobSearch(model.isOnTheJobSearch());
+		statistics.setParameter_heterogenousSearchIntensity(model.isSearchIntensity());
 
 		// Model outcomes
 		statistics.setOutcome_numberOfPersons(model.getIntValue(NCDESimModel.IntVariables.NumberOfPersons));
