@@ -168,7 +168,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	// Method to allow person to search through the list of jobs and accept one. If on the job search is turned on, currently employed individuals can move to different jobs.
 	public void searchForJob() {
 		List<Job> sampledJobList;
-		if (Parameters.SEARCH_INTENSITY) {
+		if (model.searchIntensity) {
 			sampledJobList = Helpers.pickNRandomJobs(model.getJobList(), searchIntensity); // Sample n = searchIntensity jobs from all available. This produces a list of jobs available to this person.
 		} else {
 			sampledJobList = model.getJobList();
@@ -176,7 +176,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		if (sampledJobList.size() > 0) {
 			Map<Job, Double> utilityOfSampledJobsMap = calculateUtilityOfListOfJobs(sampledJobList); // A map of job - utility combinations for jobs sampled in the previous step.
 			Job selectedJob = findJobWithHighestUtility(utilityOfSampledJobsMap); // Choose the job providing maximum utility to the person, from the list of sampled jobs.
-			if (job.getEmployer() != null && Parameters.ON_THE_JOB_SEARCH) {
+			if (job.getEmployer() != null && model.onTheJobSearch) {
 				if (Parameters.evaluateUtilityFunction(health, selectedJob.getWage()) > Parameters.evaluateUtilityFunction(health, job.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
 					updateEmployment(selectedJob); // Set person's job.
 					model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers.

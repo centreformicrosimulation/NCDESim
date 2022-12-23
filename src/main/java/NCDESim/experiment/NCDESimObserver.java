@@ -52,7 +52,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageWagePlotter, averageEmployedPlotter, averageHealthPlotter, averageFirmAmenitiesPlotter, averageIndividualAmenitiesPlotter, averageUtilityPlotter, averageProfitPlotter,
 			averageSizePlotter, populationPlotter, numberOfJobsPlotter;
 
-	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth, scatterIndividualHealthWages;
+	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth, scatterIndividualHealthWages, scatterIndividualWagesAmenities;
 
 	private HistogramSimulationPlotter amenitiesHist, wagesHist, utilityHist, profitsHist, sizeHist;
 
@@ -276,6 +276,10 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			scatterIndividualHealthWages = new ScatterplotSimulationPlotter("Health and wages", "Health", "Wages");
 			scatterIndividualHealthWages.addSeries("Health and wages", new MeanArrayFunction(healthCS), new MeanArrayFunction(wageCS));
 			addChart(scatterIndividualHealthWages, "IND CORR Health / Wages");
+
+			scatterIndividualWagesAmenities = new ScatterplotSimulationPlotter("Wages and amenity", "Wages", "Amenity");
+			scatterIndividualWagesAmenities.addSeries("Wages and amenity", new MeanArrayFunction(wageCS), new MeanArrayFunction(amenitiesCS));
+			addChart(scatterIndividualWagesAmenities, "IND CORR Wages / Amenity");
 
 			//-------------------------------------------------------------------------------------------------------
 			//

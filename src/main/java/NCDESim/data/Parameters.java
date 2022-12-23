@@ -12,9 +12,7 @@ import microsim.event.Order;
 @ToString
 public class Parameters {
 
-    // Simulated processes
-    public static final boolean ON_THE_JOB_SEARCH = true; // If true, currently employed individuals will also look for jobs each period
-    public static final boolean SEARCH_INTENSITY = false; // If true, individuals will sample jobs according to their search intensity. Otherwise, each individual will sample all jobs.
+    public static final boolean ZERO_HEALTH_DEATH = true; // If true, individuals whose health equals zero will be removed from the simulation
 
     // Scheduling
     public static final int MODEL_ORDERING = 0;
@@ -27,7 +25,6 @@ public class Parameters {
     public static final double CobbDouglasUtilityTFP = 1; // Total Factor Productivity for the CB Utility
     public static final double CobbDouglasUtilityAlpha = 0.5; // Parameter Alpha for the CB Utility
     public static final double CobbDouglasUtilityBeta = 1 - CobbDouglasUtilityAlpha; // Parameter Beta for the CB Utility
-    public static final double UtilityFixedCostOfWork = 0.1;
 
     // Graphs
     public static final int SHOW_INDIVIDUAL_GRAPHS_NUMBER_OBSERVATIONS = 100; // Individual-level graphs will be show if simulated number of observations is smaller or equal to this value

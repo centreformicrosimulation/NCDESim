@@ -49,6 +49,11 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Double amenityCostMultiplier = 0.01;
     @GUIparameter(description = "Health decay parameter lambda")
     Double lambda = 0.001;
+    @GUIparameter(description = "Toggle to switch on the job search on / off")
+    boolean onTheJobSearch = true; // If true, currently employed individuals will also look for jobs each period
+    @GUIparameter(description = "Allow heterogenous job search intensity")
+    boolean searchIntensity = false; // If true, individuals will sample jobs according to their search intensity. Otherwise, each individual will sample all jobs.
+
     private int time;
     private List<Person> individuals;
     private Set<AbstractFirm> firms;
@@ -227,9 +232,9 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     }
 
     private void jobSearch() {
-        List<Person> individualsLookingForJobs; // According to the documentation it is not possible to have filters in the yearly schedule directly. Job search is therefore all handled here, instead of splitting the updating of the filtered list and job search into two parts.
+        List<Person> individualsLookingForJobs = new ArrayList<>(); // According to the documentation it is not possible to have filters in the yearly schedule directly. Job search is therefore all handled here, instead of splitting the updating of the filtered list and job search into two parts.
 
-        if (!Parameters.ON_THE_JOB_SEARCH) {
+        if (!onTheJobSearch) {
             CollectionUtils.select(individuals, new IndividualCanLookForJobFilter<>(), individualsLookingForJobs);
         } else {
             individualsLookingForJobs = new ArrayList<>(individuals);
