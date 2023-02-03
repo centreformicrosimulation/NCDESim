@@ -33,25 +33,26 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
     Long seedIfFixed = 1166517026L;
     @GUIparameter(description = "Set the number of persons to create at launch")
-    Integer initialNumberOfPersons = 1000;
+    Integer initialNumberOfPersons = 101;
     @GUIparameter(description = "Set the number of persons to create each year")
     Integer perYearNumberOfPersons = 100;
     @GUIparameter(description = "Set the number of firms to create at launch")
-    Integer initialNumberOfFirms = 160;
-    @GUIparameter(description = "Set the number of firms to create each year")
-    Integer perYearNumberOfFirms = 15;
+    Integer initialNumberOfFirms = 10;
     @GUIparameter(description = "Set the number of firms to create each year")
     Double shareOfNewFirmsCloned = 0.50;
     @GUIparameter(description = "Set the time at which the simulation will terminate")
-    Double endTime = 1000.;
-    @GUIparameter(description = "Multiplier on the cost of amenity provided by firms")
-    Double amenityCostMultiplier = 0.01;
-    @GUIparameter(description = "Health decay parameter lambda")
-    Double lambda = 0.1;
+    Double endTime = 10000.;
+    @GUIparameter(description = "Unit cost of amenity provided by firms")
+    Double amenityUnitCost = 0.01;
+    @GUIparameter(description = "Health decay")
+    Double healthDecay = 0.1;
     @GUIparameter(description = "Toggle to switch on the job search on / off")
     boolean onTheJobSearch = true; // If true, currently employed individuals will also look for jobs each period
-    @GUIparameter(description = "Allow heterogenous job search intensity")
-    boolean searchIntensity = false; // If true, individuals will sample jobs according to their search intensity. Otherwise, each individual will sample all jobs.
+    @GUIparameter(description = "Search intensity unemployed")
+    Integer searchIntensityUnemployed = 5;
+    @GUIparameter(description = "Search intensity employed")
+    Integer searchIntensityEmployed = 1;
+    double desiredFirmSize = initialNumberOfPersons/initialNumberOfFirms;
 
     private int time;
     private List<Person> individuals;
@@ -193,8 +194,14 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
      * wages and amenities. The split is determined by shareOfNewFirmsCloned.
      */
     protected void addNewFirms() {
-        int numberOfNewClonedFirmsToAdd = (int) (perYearNumberOfFirms * shareOfNewFirmsCloned);
-        int numberOfNewRandomFirmsToAdd = perYearNumberOfFirms - numberOfNewClonedFirmsToAdd;
+
+        double stockOfIndividuals = getIndividuals().size();
+        double stockOfFirms = getFirms().size();
+        double stockOfJobs = stockOfFirms*desiredFirmSize;
+        int flowOfFirms = (int) Math.max(((stockOfIndividuals-stockOfJobs)/desiredFirmSize), 0);
+
+        int numberOfNewClonedFirmsToAdd = (int) (flowOfFirms * shareOfNewFirmsCloned);
+        int numberOfNewRandomFirmsToAdd = flowOfFirms - numberOfNewClonedFirmsToAdd;
         List<AbstractFirm> listOfFirmsInTheSimulation = new ArrayList<>(firms);
         List<AbstractFirm> listOfClonedFirms = new ArrayList<>(numberOfNewClonedFirmsToAdd);
         List<AbstractFirm> listOfRandomFirms = new ArrayList<>(numberOfNewRandomFirmsToAdd);

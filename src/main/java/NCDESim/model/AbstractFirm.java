@@ -10,6 +10,7 @@ import lombok.ToString;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
+import microsim.statistics.IIntSource;
 
 import java.util.TreeSet;
 
@@ -17,7 +18,7 @@ import java.util.TreeSet;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public abstract class AbstractFirm extends Agent implements EventListener, IDoubleSource {
+public abstract class AbstractFirm extends Agent implements EventListener, IDoubleSource, IIntSource {
     // This class defines all variables that all types of firms have in common
 
     @Transient
@@ -27,19 +28,34 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     private double wage; // Randomly drawn hourly wage offered by a firm
     private double profit; // Sum of (productivity per worker - wage) - max(0, cost * amenity)
     private int desiredSize; // Size (number of employees) that firm wants to achieve.
+    private int numberOfOffersToPost; // Number of jobs offers firm posts
+
 
     // ---------------------------------------------------------------------
     // EventListener
     // ---------------------------------------------------------------------
 
     public enum Processes {
-
     }
 
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
-
         }
+    }
+
+    // ---------------------------------------------------------------------
+    // IIntSource
+    // ---------------------------------------------------------------------
+
+    public enum IntegerVariables {
+        JobsPosted,
+    }
+
+    @Override
+    public int getIntValue(Enum<?> variable) {
+        return switch ((AbstractFirm.IntegerVariables) variable) {
+            case JobsPosted -> numberOfOffersToPost;
+        };
     }
 
     // ---------------------------------------------------------------------
@@ -122,12 +138,12 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     }
     public double calculateCostOfAmenity() {
         if (Parameters.AMENITY_COST_FLOOR_AT_ZERO) {
-            return Math.max(0, amenity * model.getAmenityCostMultiplier()); // Calculate cost of providing the amenity with a floor at zero
-        } else return amenity * model.getAmenityCostMultiplier(); // Calculate unrestricted cost of providing amenity. This implies that providing a dis-amenity increases firm's profit.
+            return Math.max(0, amenity * model.getAmenityUnitCost()); // Calculate cost of providing the amenity with a floor at zero
+        } else return amenity * model.getAmenityUnitCost(); // Calculate unrestricted cost of providing amenity. This implies that providing a dis-amenity increases firm's profit.
     }
 
     public void postJobOffers() {
-        int numberOfOffersToPost = desiredSize - employeesSet.size(); // Firms post job offers to reach their desired size
+        numberOfOffersToPost = desiredSize - employeesSet.size(); // Firms post job offers to reach their desired size
         for (int i = 0; i < numberOfOffersToPost; i++) {
             Job jobToPost = new Job(this, this.amenity, this.wage); // Create a job offer
             model.getJobList().add(jobToPost); // Add the job offer to the list of available offers

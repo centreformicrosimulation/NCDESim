@@ -20,6 +20,7 @@ import microsim.gui.plot.HistogramSimulationPlotter;
 import microsim.gui.plot.ScatterplotSimulationPlotter;
 import microsim.gui.plot.TimeSeriesSimulationPlotter;
 import microsim.statistics.CrossSection;
+import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.MultiTraceFunction;
 import microsim.statistics.functions.SumArrayFunction;
@@ -52,7 +53,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			averageWagePlotter, averageEmployedPlotter, averageHealthPlotter, averageFirmAmenitiesPlotter, averageIndividualAmenitiesPlotter, averageUtilityPlotter, averageProfitPlotter,
 			averageSizePlotter, populationPlotter, numberOfJobsPlotter;
 
-	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth, scatterIndividualHealthWages, scatterIndividualWagesAmenities;
+	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth, scatterIndividualHealthWages, scatterIndividualWagesAmenities, scatterIndividualWagesAmenitiesCS;
 
 	private HistogramSimulationPlotter amenitiesHist, wagesHist, utilityHist, profitsHist, sizeHist;
 
@@ -137,10 +138,10 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			/*
 			NUMBER OF JOBS ADVERTISED
 			 */
+			CrossSection.Integer jobOffersCS = new CrossSection.Integer(model.getFirms(), AbstractFirm.IntegerVariables.JobsPosted);
 			numberOfJobsPlotter = new TimeSeriesSimulationPlotter("Number of advertised jobs", "Jobs");
-			numberOfJobsPlotter.addSeries("Jobs", new MultiTraceFunction.Double(model, NCDESimModel.DoubleVariables.NumberOfJobs));
+			numberOfJobsPlotter.addSeries("Jobs", new MeanArrayFunction(jobOffersCS));
 			addChart(numberOfJobsPlotter, "MODEL Number of jobs");
-
 
 			/*
 			 * HEALTH (INDIVIDUALS)
@@ -270,7 +271,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			}
 
 			/*
-			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS
+			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS BASED ON MEAN VALUES
 			 */
 			scatterIndividualHealthUtility = new ScatterplotSimulationPlotter("Health and utility", "Health", "Utility");
 			scatterIndividualHealthUtility.addSeries("Health and utility", new MeanArrayFunction(healthCS), new MeanArrayFunction(utilityCS));
@@ -287,6 +288,15 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			scatterIndividualWagesAmenities = new ScatterplotSimulationPlotter("Wages and amenity", "Wages", "Amenity");
 			scatterIndividualWagesAmenities.addSeries("Wages and amenity", new MeanArrayFunction(wageCS), new MeanArrayFunction(amenitiesCS));
 			addChart(scatterIndividualWagesAmenities, "IND CORR Wages / Amenity");
+
+			/*
+			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS BASED ON CROSS-SECTIONS
+			 */
+
+			scatterIndividualWagesAmenitiesCS = new ScatterplotSimulationPlotter("Wages and amenity cross-section", "Wages", "Amenity");
+			Person test = new Person();
+			scatterIndividualWagesAmenitiesCS.addSeries("Wage", test.getHealth(), test.getDoubleValue(Person.DoubleVariables.Age));
+			addChart(scatterIndividualWagesAmenitiesCS, "TEST");
 
 			//-------------------------------------------------------------------------------------------------------
 			//

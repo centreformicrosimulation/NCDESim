@@ -22,7 +22,8 @@ public class SimulationStatistics {
 
     // Model parameters
     private int parameter_numberOfPersonsInitial, parameter_perYearNumberOfPersons, parameter_numberOfFirmsInitial, parameter_perYearNumberOfFirms;
-    private double parameter_shareOfNewFirmsCloned, parameter_endTime, parameter_amenityCostMultiplier, parameter_healthDecayLambda;
+    private double parameter_shareOfNewFirmsCloned, parameter_endTime, parameter_amenityCostMultiplier, parameter_healthDecayLambda, parameter_searchIntensityEmployed,
+            parameterSearchIntensityUnemployed;
     private boolean parameter_onTheJobSearch, parameter_heterogenousSearchIntensity;
 
     // Aggregate model statistics

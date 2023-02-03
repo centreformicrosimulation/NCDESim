@@ -44,7 +44,8 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		this.key = new PanelEntityKey(idCounter++);
 		this.age = SimulationEngine.getRnd().nextInt(20, 60); // Each person has a random age between 20 and 60
 		this.health = SimulationEngine.getRnd().nextDouble(); // Each person has a random health level between 0 and 1
-		this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
+	//	this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
+		this.productivity = 1;
 		this.job = new Job(null, 0., 0.); // Job of the person
 		this.searchIntensity = SimulationEngine.getRnd().nextInt(Parameters.MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON)+1; // Only used if turned on in Parameters
 
@@ -148,8 +149,8 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	//	double currentHealthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), age) - 1) + job.getAmenity()), 1);
 	//	double maximumPotentialAgeHealthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), 80) - 1) + job.getAmenity()), 1);
 
-		double maximumPotentialHealthDecay = (Math.pow(1 + model.getLambda(), Parameters.PERSON_MAXIMUM_POTENTIAL_AGE) - 1); // Normalisation factor based on maximum possible health decay
-		double currentHealthDecay = (Math.pow(1 + model.getLambda(), age) - 1);
+		double maximumPotentialHealthDecay = (Math.pow(1 + model.getHealthDecay(), Parameters.PERSON_MAXIMUM_POTENTIAL_AGE) - 1); // Normalisation factor based on maximum possible health decay
+		double currentHealthDecay = (Math.pow(1 + model.getHealthDecay(), age) - 1);
 		double normalisedHealthDecay = currentHealthDecay/maximumPotentialHealthDecay;
 		health = Math.min((health_L1 - normalisedHealthDecay + job.getAmenity()), 1); // Health score with normalised health decay
 	}
@@ -177,10 +178,10 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	// Method to allow person to search through the list of jobs and accept one. If on the job search is turned on, currently employed individuals can move to different jobs.
 	public void searchForJob() {
 		List<Job> sampledJobList;
-		if (model.searchIntensity) {
-			sampledJobList = Helpers.pickNRandomJobs(model.getJobList(), searchIntensity); // Sample n = searchIntensity jobs from all available. This produces a list of jobs available to this person.
+		if (job.getEmployer() != null) {
+			sampledJobList = Helpers.pickNRandomJobs(model.getJobList(), model.getSearchIntensityEmployed()); // Sample n = searchIntensityEmployed jobs from all available. This produces a list of jobs available to this person.
 		} else {
-			sampledJobList = model.getJobList();
+			sampledJobList = Helpers.pickNRandomJobs(model.getJobList(), model.getSearchIntensityUnemployed());
 		}
 		if (sampledJobList.size() > 0) {
 			Map<Job, Double> utilityOfSampledJobsMap = calculateUtilityOfListOfJobs(sampledJobList); // A map of job - utility combinations for jobs sampled in the previous step.
