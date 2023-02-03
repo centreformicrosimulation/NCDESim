@@ -1,6 +1,5 @@
 package NCDESim.data;
 
-import NCDESim.algorithms.Helpers;
 import NCDESim.data.enums.UtilityFunctions;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +20,7 @@ public class Parameters {
 
     // Parameters
     public static final int PERSON_REMOVAL_AGE = 60; // Remove persons from the simulation when they reach this age
+    public static final int PERSON_MAXIMUM_POTENTIAL_AGE = 80; // Maximum potential age, used in normalisation of health score
     public static final UtilityFunctions UTILITY_FUNCTION = UtilityFunctions.CobbDouglas;
     public static final double CobbDouglasUtilityTFP = 1; // Total Factor Productivity for the CB Utility
     public static final double CobbDouglasUtilityAlpha = 0.5; // Parameter Alpha for the CB Utility

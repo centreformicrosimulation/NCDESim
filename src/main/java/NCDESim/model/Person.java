@@ -3,14 +3,15 @@ package NCDESim.model;
 import NCDESim.algorithms.Helpers;
 import NCDESim.data.Parameters;
 import NCDESim.model.objects.Job;
-import lombok.*;
-import microsim.annotation.GUIparameter;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
 import microsim.statistics.IDoubleSource;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Transient;
-import jakarta.persistence.EmbeddedId;
 import microsim.statistics.IIntSource;
 
 import java.util.*;
@@ -41,7 +42,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		super();
 
 		this.key = new PanelEntityKey(idCounter++);
-		this.age = SimulationEngine.getRnd().nextInt(100); // Each person has a random age between 0 and 100
+		this.age = SimulationEngine.getRnd().nextInt(20, 60); // Each person has a random age between 20 and 60
 		this.health = SimulationEngine.getRnd().nextDouble(); // Each person has a random health level between 0 and 1
 		this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
 		this.job = new Job(null, 0., 0.); // Job of the person
@@ -142,7 +143,15 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	// Method to calculate the level of health
 	public void updateHealth() {
 	//	health = health_L1 - (model.getLambda() * age) + job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
-		health = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), age) - 1) + job.getAmenity()), 1);
+	//	double healthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), age) - 1) + job.getAmenity()), 1); // Health score
+
+	//	double currentHealthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), age) - 1) + job.getAmenity()), 1);
+	//	double maximumPotentialAgeHealthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), 80) - 1) + job.getAmenity()), 1);
+
+		double maximumPotentialHealthDecay = (Math.pow(1 + model.getLambda(), Parameters.PERSON_MAXIMUM_POTENTIAL_AGE) - 1); // Normalisation factor based on maximum possible health decay
+		double currentHealthDecay = (Math.pow(1 + model.getLambda(), age) - 1);
+		double normalisedHealthDecay = currentHealthDecay/maximumPotentialHealthDecay;
+		health = Math.min((health_L1 - normalisedHealthDecay + job.getAmenity()), 1); // Health score with normalised health decay
 	}
 
 	public void updateUtility() {

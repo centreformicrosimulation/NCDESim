@@ -169,7 +169,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	 */
 	private void recordStatistics() {
 		// Model parameters
-		statistics.setParameter_numberOfPersonsInitial(model.getNumberOfPersons());
+		statistics.setParameter_numberOfPersonsInitial(model.getInitialNumberOfPersons());
 		statistics.setParameter_perYearNumberOfPersons(model.getPerYearNumberOfPersons());
 		statistics.setParameter_numberOfFirmsInitial(model.getInitialNumberOfFirms());
 		statistics.setParameter_perYearNumberOfFirms(model.getPerYearNumberOfFirms());

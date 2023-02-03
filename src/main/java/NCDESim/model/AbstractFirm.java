@@ -22,7 +22,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
 
     @Transient
     private TreeSet<Person> employeesSet; // Set of employees of a firm
-    private double amenity; // Level of amenities provided by firm, between <-1;1>
+    private double amenity; // Level of amenities provided by firm, between <0;1>
     private double costOfAmenity; // Cost of providing amenity per employee
     private double wage; // Randomly drawn hourly wage offered by a firm
     private double profit; // Sum of (productivity per worker - wage) - max(0, cost * amenity)
@@ -71,7 +71,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         this.amenity = SimulationEngine.getRnd().nextDouble() * 2 - 1;
         this.wage = SimulationEngine.getRnd().nextDouble();
         this.costOfAmenity = calculateCostOfAmenity();
-        this.desiredSize = 5;
+        this.desiredSize = model.getInitialNumberOfPersons()/model.getInitialNumberOfFirms();
     }
 
     // Constructor to clone firms. Note that firms' characteristics are cloned, but not relationships to employees etc.

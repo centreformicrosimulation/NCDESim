@@ -60,7 +60,7 @@ public class NCDESimMultiRun extends MultiRun {
 
 		// Overwrite the default values of the parameters of the simulation
 		collector.setExportToCSV(true); // Write outputs to CSV
-		model.setNumberOfPersons(numberOfPersons);
+		model.setInitialNumberOfPersons(numberOfPersons);
 		model.setShareOfNewFirmsCloned(shareOfNewFirmsCloned);
 	}
 

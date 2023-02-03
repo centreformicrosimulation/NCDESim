@@ -1,14 +1,12 @@
 package NCDESim.model;
 
 import NCDESim.algorithms.Helpers;
-import NCDESim.data.Parameters;
 import NCDESim.data.filters.FirmRemovalFilter;
 import NCDESim.data.filters.IndividualCanLookForJobFilter;
 import NCDESim.data.filters.PersonRemovalFilter;
-import NCDESim.experiment.NCDESimCollector;
 import NCDESim.model.objects.Job;
-import jakarta.persistence.Transient;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import microsim.annotation.GUIparameter;
 import microsim.data.db.DatabaseUtils;
 import microsim.engine.AbstractSimulationManager;
@@ -25,6 +23,7 @@ import org.apache.log4j.Logger;
 import java.util.*;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class NCDESimModel extends AbstractSimulationManager implements EventListener, IDoubleSource, IIntSource {
 
     //Parameters of the model
@@ -34,7 +33,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
     Long seedIfFixed = 1166517026L;
     @GUIparameter(description = "Set the number of persons to create at launch")
-    Integer numberOfPersons = 1000;
+    Integer initialNumberOfPersons = 1000;
     @GUIparameter(description = "Set the number of persons to create each year")
     Integer perYearNumberOfPersons = 100;
     @GUIparameter(description = "Set the number of firms to create at launch")
@@ -48,7 +47,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Multiplier on the cost of amenity provided by firms")
     Double amenityCostMultiplier = 0.01;
     @GUIparameter(description = "Health decay parameter lambda")
-    Double lambda = 0.001;
+    Double lambda = 0.1;
     @GUIparameter(description = "Toggle to switch on the job search on / off")
     boolean onTheJobSearch = true; // If true, currently employed individuals will also look for jobs each period
     @GUIparameter(description = "Allow heterogenous job search intensity")
@@ -175,7 +174,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 		Create a collection of individuals to simulate
 		 */
         individuals = new LinkedList<>();
-        for (int i = 0; i < numberOfPersons; i++) {
+        for (int i = 0; i < initialNumberOfPersons; i++) {
             individuals.add(new Person());
         }
 
@@ -239,6 +238,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         } else {
             individualsLookingForJobs = new ArrayList<>(individuals);
         }
+        Collections.shuffle(individualsLookingForJobs, SimulationEngine.getRnd()); // Shuffle individuals so the order in which they look for jobs is random
         individualsLookingForJobs.forEach(Person::searchForJob); // Call searchForJob method on each person on the list of individuals lookingForJobs
     }
 

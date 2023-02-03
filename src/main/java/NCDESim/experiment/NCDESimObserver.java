@@ -156,6 +156,13 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			addChart(averageHealthPlotter, "IND Avg. health");
 
 			/*
+			 * HISTOGRAM OF UTILITY
+			 */
+			utilityHist = new HistogramSimulationPlotter("Health histogram", "Health", HistogramType.FREQUENCY, 100);
+			utilityHist.addCollectionSource("Health", healthCS);
+			addChart(utilityHist, "HIST Health");
+
+			/*
 			 * AMENITIES (INDIVIDUALS)
 			 */
 			csAmenitiesPlotter = new TimeSeriesSimulationPlotter("Agents' amenities", "Amenities");
