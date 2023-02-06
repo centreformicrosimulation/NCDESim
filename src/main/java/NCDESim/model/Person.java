@@ -45,7 +45,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		this.age = SimulationEngine.getRnd().nextInt(20, 60); // Each person has a random age between 20 and 60
 		this.health = SimulationEngine.getRnd().nextDouble(); // Each person has a random health level between 0 and 1
 	//	this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
-		this.productivity = 1;
+		this.productivity = 1; // Homogenous productivity
 		this.job = new Job(null, 0., 0.); // Job of the person
 		this.searchIntensity = SimulationEngine.getRnd().nextInt(Parameters.MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON)+1; // Only used if turned on in Parameters
 
@@ -118,6 +118,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			case Utility -> utility;
 		};
 	}
+
 
 
 	// ---------------------------------------------------------------------
