@@ -34,6 +34,8 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	@Transient
 	private Job job;
 	private boolean flagChangedJobs;
+	private double testVar1 = SimulationEngine.getRnd().nextDouble();
+	private double testVar2 = Math.pow(testVar1,2);
 
 	// ---------------------------------------------------------------------
 	// Constructors and Initialization
@@ -104,7 +106,9 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		Count,
 		Health,
 		Utility,
-		Wage
+		Wage,
+		TestVar1,
+		TestVar2,
 	}
 
 	@Override
@@ -116,6 +120,8 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			case Health -> health;
 			case Wage -> job.getWage();
 			case Utility -> utility;
+			case TestVar1 -> testVar1;
+			case TestVar2 -> testVar2;
 		};
 	}
 
@@ -187,9 +193,15 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		if (sampledJobList.size() > 0) {
 			Map<Job, Double> utilityOfSampledJobsMap = calculateUtilityOfListOfJobs(sampledJobList); // A map of job - utility combinations for jobs sampled in the previous step.
 			Job selectedJob = findJobWithHighestUtility(utilityOfSampledJobsMap); // Choose the job providing maximum utility to the person, from the list of sampled jobs.
+			Job currentJob = this.job;
 			if (job.getEmployer() != null && model.onTheJobSearch) {
-				if (Parameters.evaluateUtilityFunction(health, selectedJob.getWage()) > Parameters.evaluateUtilityFunction(health, job.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
+				if (Parameters.evaluateUtilityFunction(health, selectedJob.getWage()) > Parameters.evaluateUtilityFunction(health, currentJob.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
 					updateEmployment(selectedJob); // Set person's job.
+
+					if (!model.destroyJobs) { // If destroyJobs parameter is set to false, the job that individual leaves is added to the list from which other individuals can sample jobs
+						model.getJobList().add(currentJob);
+					}
+
 					model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers.
 					setFlagChangedJobs(true); // Record the fact that employed individual changed jobs by setting flagChangedJobs to true.
 				}

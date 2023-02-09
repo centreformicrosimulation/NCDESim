@@ -48,6 +48,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Double healthDecay = 0.1;
     @GUIparameter(description = "Toggle to switch on the job search on / off")
     boolean onTheJobSearch = true; // If true, currently employed individuals will also look for jobs each period
+    @GUIparameter(description = "Toggle to destroy jobs left during on the job search")
+    boolean destroyJobs = false;
     @GUIparameter(description = "Search intensity unemployed")
     Integer searchIntensityUnemployed = 5;
     @GUIparameter(description = "Search intensity employed")
