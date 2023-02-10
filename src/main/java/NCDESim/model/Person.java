@@ -28,7 +28,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	private static long idCounter = 1;
 	private int age;
 	private double health, health_L1;
-	private double productivity;
+	private double productivity, productivity_L1;
 	private double utility;
 	private int searchIntensity;
 	@Transient
@@ -56,6 +56,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 
 		// Initialise lagged values
 		this.health_L1 = health; // In the first period, lagged value of health is equal to the value of health
+		this.productivity_L1 = productivity; // In the first period, lagged value of productivity is equal to the value of productivity
 	}
 
 	// ---------------------------------------------------------------------
@@ -74,6 +75,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			case BeginNewYear -> beginNewYear();
 			case Update -> {
 				updateHealth();
+				updateProductivity();
 				updateUtility();
 			}
 		}
@@ -85,7 +87,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 
 	public enum IntegerVariables {
 		ChangedJobs,
-		IsEmployed
+		IsEmployed,
 	}
 
 	@Override
@@ -142,6 +144,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 
 		// Update lagged values
 		this.health_L1 = health;
+		this.productivity_L1 = productivity;
 	}
 
 	public void age() {
@@ -160,6 +163,10 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		double currentHealthDecay = (Math.pow(1 + model.getHealthDecay(), age) - 1);
 		double normalisedHealthDecay = currentHealthDecay/maximumPotentialHealthDecay;
 		health = Math.min((health_L1 - normalisedHealthDecay + job.getAmenity()), 1); // Health score with normalised health decay
+	}
+
+	public void updateProductivity() {
+		productivity = productivity_L1 * ((1 - model.getLambda() * (1 - health)));
 	}
 
 	public void updateUtility() {

@@ -38,14 +38,18 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Integer perYearNumberOfPersons = 100;
     @GUIparameter(description = "Set the number of firms to create at launch")
     Integer initialNumberOfFirms = 10;
-    @GUIparameter(description = "Set the number of firms to create each year")
-    Double shareOfNewFirmsCloned = 0.50;
+    @GUIparameter(description = "Set the share of firms cloned each year")
+    Double shareOfNewFirmsCloned = 0.9;
+    @GUIparameter(description = "Toggle to add random variation (noise) to cloned firms")
+    boolean cloneWithNoise = true;
     @GUIparameter(description = "Set the time at which the simulation will terminate")
     Double endTime = 10000.;
     @GUIparameter(description = "Unit cost of amenity provided by firms")
     Double amenityUnitCost = 0.01;
     @GUIparameter(description = "Health decay")
     Double healthDecay = 0.1;
+    @GUIparameter(description = "Health effect on productivity parameter")
+    Double lambda = 1.;
     @GUIparameter(description = "Toggle to switch on the job search on / off")
     boolean onTheJobSearch = true; // If true, currently employed individuals will also look for jobs each period
     @GUIparameter(description = "Toggle to destroy jobs left during on the job search")
@@ -60,6 +64,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     private List<Person> individuals;
     private Set<AbstractFirm> firms;
     private List<Job> jobList; //List of job offers made by firms, characterised by wage and amenity
+    private int numberOfFirmsCreated, numberOfFirmsDestroyed;
 
     // ---------------------------------------------------------------------
     // Manager methods
@@ -133,6 +138,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
             case BeginNewYear -> {
                 time++;
                 clearJobList();
+                numberOfFirmsCreated = 0;
             }
         }
     }
@@ -142,6 +148,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     public enum IntVariables {
         NumberOfFirms,
         NumberOfPersons,
+        NumberOfFirmsCreated,
+        NumberOfFirmsDestroyed,
     }
 
     @Override
@@ -150,6 +158,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
             case NumberOfFirms -> getFirms().size();
             case NumberOfPersons -> getIndividuals().size();
+            case NumberOfFirmsCreated -> numberOfFirmsCreated;
+            case NumberOfFirmsDestroyed -> numberOfFirmsDestroyed;
         };
     }
     // ---------------------------------------------------------------------
@@ -201,6 +211,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         double stockOfFirms = getFirms().size();
         double stockOfJobs = stockOfFirms*desiredFirmSize;
         int flowOfFirms = (int) Math.max(((stockOfIndividuals-stockOfJobs)/desiredFirmSize), 0);
+        numberOfFirmsCreated += flowOfFirms;
 
         int numberOfNewClonedFirmsToAdd = (int) (flowOfFirms * shareOfNewFirmsCloned);
         int numberOfNewRandomFirmsToAdd = flowOfFirms - numberOfNewClonedFirmsToAdd;
@@ -215,7 +226,11 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
                 if (Double.isNaN(weight)) weight = 0.5;
                 boolean add = SimulationEngine.getRnd().nextDouble() <= weight;
                 if (add) {
-                    listOfClonedFirms.add(new FirmTypeA(firm));
+                    if (cloneWithNoise) {
+                        listOfClonedFirms.add(new FirmTypeA(firm, true)); // Clone firm with some amount of noise added
+                    } else {
+                        listOfClonedFirms.add(new FirmTypeA(firm));
+                    }
                     i++;
                     if (i >= numberOfNewClonedFirmsToAdd) {
                         break;
@@ -258,6 +273,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     private void removeFirms() {
         List<AbstractFirm> firmsToRemove = new ArrayList<>();
         CollectionUtils.select(getFirms(), new FirmRemovalFilter<>(), firmsToRemove);
+        numberOfFirmsDestroyed = firmsToRemove.size();
         Iterator<AbstractFirm> itr = firmsToRemove.iterator();
         while (itr.hasNext()) {
             AbstractFirm firm = itr.next();

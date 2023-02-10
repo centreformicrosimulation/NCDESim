@@ -1,5 +1,6 @@
 package NCDESim.experiment;
 
+import NCDESim.algorithms.ScatterplotTest;
 import NCDESim.data.Parameters;
 import NCDESim.model.AbstractFirm;
 import NCDESim.model.NCDESimModel;
@@ -20,7 +21,7 @@ import microsim.gui.plot.HistogramSimulationPlotter;
 import microsim.gui.plot.ScatterplotSimulationPlotter;
 import microsim.gui.plot.TimeSeriesSimulationPlotter;
 import microsim.statistics.CrossSection;
-import microsim.statistics.IDoubleSource;
+import microsim.statistics.IIntSource;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.MultiTraceFunction;
 import microsim.statistics.functions.SumArrayFunction;
@@ -51,9 +52,10 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 
 	private TimeSeriesSimulationPlotter csAgePlotter, csHealthPlotter, csWagePlotter, csUtilityPlotter, csAmenitiesPlotter, averageAgePlotter,
 			averageWagePlotter, averageEmployedPlotter, averageHealthPlotter, averageFirmAmenitiesPlotter, averageIndividualAmenitiesPlotter, averageUtilityPlotter, averageProfitPlotter,
-			averageSizePlotter, populationPlotter, numberOfJobsPlotter;
+			averageSizePlotter, populationPlotter, numberOfJobsPlotter, numberOfFirmsCreatedAndDestroyedPlotter;
 
 	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth, scatterIndividualHealthWages, scatterIndividualWagesAmenities, scatterIndividualWagesAmenitiesCS;
+	private ScatterplotTest csScatterIndividualHealthUtility, csScatterIndividualAmenityHealth, csScatterIndividualHealthWages, csScatterIndividualWagesAmenities, csScatterIndividualWagesAmenitiesCS;
 
 	private HistogramSimulationPlotter amenitiesHist, wagesHist, utilityHist, profitsHist, sizeHist;
 
@@ -91,7 +93,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 		if(showGraphs) {
 
 			updateChartSet = new LinkedHashSet<>(); // Set of all charts needed to be scheduled for updating
-			tabSet = new LinkedHashSet<>();		//Set of all JInternalFrames each having a tab.  Each tab frame will potentially contain more than one cha
+			tabSet = new LinkedHashSet<>();		//Set of all JInternalFrames each having a tab.  Each tab frame will potentially contain more than one chart.
 
 			/*
 			 * NUMBER OF INDIVIDUALS, FIRMS
@@ -102,6 +104,15 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			populationPlotter.addSeries("Individuals", new SumArrayFunction.Double(populationIndividualsCS));
 			populationPlotter.addSeries("Firms", new SumArrayFunction.Double(populationFirmsCS));
 			addChart(populationPlotter, "Population");
+
+			/*
+			 * FIRM CREATION AND DESTRUCTION RATES
+			 */
+			numberOfFirmsCreatedAndDestroyedPlotter = new TimeSeriesSimulationPlotter("Number of created and destroyed firms", "Number");
+			numberOfFirmsCreatedAndDestroyedPlotter.addSeries("Firms created", (IIntSource) new MultiTraceFunction.Integer(model, NCDESimModel.IntVariables.NumberOfFirmsCreated));
+			numberOfFirmsCreatedAndDestroyedPlotter.addSeries("Firms destroyed", (IIntSource) new MultiTraceFunction.Integer(model, NCDESimModel.IntVariables.NumberOfFirmsDestroyed));
+			addChart(numberOfFirmsCreatedAndDestroyedPlotter, "Firm entry and exit");
+
 
 			/*
 			 * HISTOGRAM OF AGE
@@ -271,7 +282,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			}
 
 			/*
-			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS BASED ON MEAN VALUES
+			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS BASED ON MEAN VALUES OVER TIME
 			 */
 			scatterIndividualHealthUtility = new ScatterplotSimulationPlotter("Health and utility", "Health", "Utility");
 			scatterIndividualHealthUtility.addSeries("Health and utility", new MeanArrayFunction(healthCS), new MeanArrayFunction(utilityCS));
@@ -290,14 +301,40 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			addChart(scatterIndividualWagesAmenities, "IND CORR Wages / Amenity");
 
 			/*
-			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS BASED ON CROSS-SECTIONS
+			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS BASED ON CROSS-SECTIONAL VALUES
 			 */
 
-			scatterIndividualWagesAmenitiesCS = new ScatterplotSimulationPlotter("Wages and amenity cross-section", "Wages", "Amenity");
-			Person test = new Person();
-			scatterIndividualWagesAmenitiesCS.addSeries("Wage", test.getHealth(), test.getDoubleValue(Person.DoubleVariables.Age));
-			addChart(scatterIndividualWagesAmenitiesCS, "TEST");
+			csScatterIndividualHealthUtility = new ScatterplotTest("Health and utility", "Health", "Utility");
+			csScatterIndividualHealthUtility.addSeries("Health and utility", healthCS, utilityCS);
+			addChart(csScatterIndividualHealthUtility, "IND CS CORR Health / Utility");
 
+			csScatterIndividualAmenityHealth = new ScatterplotTest("Health and amenity", "Amenity", "Health");
+			csScatterIndividualAmenityHealth.addSeries("Health and amenity", amenitiesCS, healthCS);
+			addChart(csScatterIndividualAmenityHealth, "IND CS CORR Health / Amenity");
+
+			csScatterIndividualHealthWages = new ScatterplotTest("Health and wages", "Health", "Wages");
+			csScatterIndividualHealthWages.addSeries("Health and wages", healthCS, wageCS);
+			addChart(csScatterIndividualHealthWages, "IND CS CORR Health / Wages");
+
+			CrossSection.Double wagesFirmCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Wages);
+			csScatterIndividualWagesAmenities = new ScatterplotTest("Wages and amenity", "Wages", "Amenity");
+			csScatterIndividualWagesAmenities.addSeries("Wages and amenity", wagesFirmCS, amenitiesFirmCS);
+			addChart(csScatterIndividualWagesAmenities, "FIRM CS CORR Wages / Amenity");
+
+
+			/*
+			TESTING
+
+
+			CrossSection.Double testCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.TestVar1);
+			CrossSection.Double testCS2 = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.TestVar2);
+
+
+			// TEST 2 OF SCATTERPLOTTEST CLASS
+			ScatterplotTest testSP2 = new ScatterplotTest("X to the power of 2 equals Y", "X", "Y");
+			testSP2.addSeries("Test", testCS, testCS2);
+			addChart(testSP2, "X to the power of 2 equals Y");
+ */
 			//-------------------------------------------------------------------------------------------------------
 			//
 			//	BUILD A TABBED PANE HOLDING ALL THE CHARTS THAT ONLY UPDATE AT EACH TIME-STEP

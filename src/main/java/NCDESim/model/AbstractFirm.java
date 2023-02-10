@@ -66,6 +66,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         Count,
         Profit,
         Size,
+        Wages,
     }
     @Override
     public double getDoubleValue(Enum<?> variable) {
@@ -74,6 +75,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
             case Count -> 1.;
             case Profit -> profit;
             case Size -> getEmployeesSet().size();
+            case Wages -> wage;
         };
     }
     // ---------------------------------------------------------------------
@@ -98,6 +100,23 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         this.wage = originalFirm.wage;
         this.costOfAmenity = originalFirm.costOfAmenity;
         this.desiredSize = originalFirm.desiredSize;
+    }
+
+    public AbstractFirm(AbstractFirm originalFirm, boolean withNoise) {
+        super();
+        if (withNoise) {
+            this.employeesSet = new TreeSet<>(); // originalFirm is cloned, but cannot clone the employees
+            this.amenity = originalFirm.amenity * SimulationEngine.getRnd().nextDouble(0.8, 1);
+            this.wage = originalFirm.wage * SimulationEngine.getRnd().nextDouble(0.8, 1);
+            this.costOfAmenity = originalFirm.costOfAmenity * SimulationEngine.getRnd().nextDouble(0.8, 1);;
+            this.desiredSize = originalFirm.desiredSize;
+        } else {
+            this.employeesSet = new TreeSet<>(); // originalFirm is cloned, but cannot clone the employees
+            this.amenity = originalFirm.amenity;
+            this.wage = originalFirm.wage;
+            this.costOfAmenity = originalFirm.costOfAmenity;
+            this.desiredSize = originalFirm.desiredSize;
+        }
     }
 
     // ---------------------------------------------------------------------

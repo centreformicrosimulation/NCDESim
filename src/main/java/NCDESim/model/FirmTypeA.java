@@ -51,6 +51,10 @@ public class FirmTypeA extends AbstractFirm implements EventListener, IDoubleSou
         super(originalFirm);
     }
 
+    public FirmTypeA(AbstractFirm originalFirm, boolean withNoise) {
+        super(originalFirm, withNoise);
+    }
+
     // ---------------------------------------------------------------------
     // Own methods
     // ---------------------------------------------------------------------
