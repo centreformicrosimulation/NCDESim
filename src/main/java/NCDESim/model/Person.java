@@ -165,7 +165,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	}
 
 	public void updateProductivity() {
-		productivity = productivity_L1 * ((1 - model.getLambda() * (1 - health)));
+		productivity = productivity_L1 * ((1 - model.getLambda() * Math.sqrt((1 - health))));
 	}
 
 	public void updateUtility() {
