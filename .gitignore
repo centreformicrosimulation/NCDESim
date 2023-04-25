@@ -226,3 +226,6 @@ input/input.h2.db
 input/input.h2.db
 input/input.trace.db
 /input/input.mv.db
+*.xml
+.classpath
+.project
