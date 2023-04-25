@@ -21,6 +21,7 @@ import microsim.gui.plot.HistogramSimulationPlotter;
 import microsim.gui.plot.ScatterplotSimulationPlotter;
 import microsim.gui.plot.TimeSeriesSimulationPlotter;
 import microsim.statistics.CrossSection;
+import microsim.statistics.IDoubleSource;
 import microsim.statistics.IIntSource;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.MultiTraceFunction;
@@ -151,7 +152,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			 */
 			CrossSection.Integer jobOffersCS = new CrossSection.Integer(model.getFirms(), AbstractFirm.IntegerVariables.JobsPosted);
 			numberOfJobsPlotter = new TimeSeriesSimulationPlotter("Number of advertised jobs", "Jobs");
-			numberOfJobsPlotter.addSeries("Jobs", new MeanArrayFunction(jobOffersCS));
+			numberOfJobsPlotter.addSeries("Jobs", (IDoubleSource) new SumArrayFunction.Integer(jobOffersCS));
 			addChart(numberOfJobsPlotter, "MODEL Number of jobs");
 
 			/*
