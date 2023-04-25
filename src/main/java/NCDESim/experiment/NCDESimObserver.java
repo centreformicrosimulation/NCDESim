@@ -266,7 +266,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			addChart(averageSizePlotter, "FIRM Avg. size");
 
 			/*
-			 * HISTOGRAM OF FIRM PROFITS
+			 * HISTOGRAM OF FIRM SIZE
 			 */
 			sizeHist = new HistogramSimulationPlotter("Firm size histogram", "Size", HistogramType.FREQUENCY, 100);
 			sizeHist.addCollectionSource("Size", sizeCS);
@@ -282,7 +282,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			}
 
 			/*
-			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS BASED ON MEAN VALUES OVER TIME
+			 * SCATTER PLOTS - CORRELATIONS BASED ON MEAN VALUES OVER TIME
 			 */
 			scatterIndividualHealthUtility = new ScatterplotSimulationPlotter("Health and utility", "Health", "Utility");
 			scatterIndividualHealthUtility.addSeries("Health and utility", new MeanArrayFunction(healthCS), new MeanArrayFunction(utilityCS));
@@ -301,7 +301,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			addChart(scatterIndividualWagesAmenities, "IND CORR Wages / Amenity");
 
 			/*
-			 * SCATTER PLOTS (INDIVIDUALS) - CORRELATIONS BASED ON CROSS-SECTIONAL VALUES
+			 * SCATTER PLOTS - CORRELATIONS BASED ON CROSS-SECTIONAL VALUES
 			 */
 
 			csScatterIndividualHealthUtility = new ScatterplotTest("Health and utility", "Health", "Utility");
@@ -318,23 +318,14 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 
 			CrossSection.Double wagesFirmCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Wages);
 			csScatterIndividualWagesAmenities = new ScatterplotTest("Wages and amenity", "Wages", "Amenity");
-			csScatterIndividualWagesAmenities.addSeries("Wages and amenity", wagesFirmCS, amenitiesFirmCS);
+			csScatterIndividualWagesAmenities.addSeries("Wages and amenity", amenitiesFirmCS, wagesFirmCS);
 			addChart(csScatterIndividualWagesAmenities, "FIRM CS CORR Wages / Amenity");
 
-
-			/*
-			TESTING
-
-
-			CrossSection.Double testCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.TestVar1);
-			CrossSection.Double testCS2 = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.TestVar2);
+			csScatterIndividualWagesAmenities = new ScatterplotTest("Profits and amenity", "Profit", "Amenity");
+			csScatterIndividualWagesAmenities.addSeries("Profits and amenity", amenitiesFirmCS, profitCS);
+			addChart(csScatterIndividualWagesAmenities, "FIRM CS CORR Profits / Amenity");
 
 
-			// TEST 2 OF SCATTERPLOTTEST CLASS
-			ScatterplotTest testSP2 = new ScatterplotTest("X to the power of 2 equals Y", "X", "Y");
-			testSP2.addSeries("Test", testCS, testCS2);
-			addChart(testSP2, "X to the power of 2 equals Y");
- */
 			//-------------------------------------------------------------------------------------------------------
 			//
 			//	BUILD A TABBED PANE HOLDING ALL THE CHARTS THAT ONLY UPDATE AT EACH TIME-STEP
@@ -351,7 +342,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 			chartsFrame.setResizable(true);
 			chartsFrame.setMaximizable(true);
-			GuiUtils.addWindow(chartsFrame, 300, 0, 1560, 660);
+			GuiUtils.addWindow(chartsFrame, 321, 133, 800, 600);
 		}
 
 			log.debug("Observer objects created");
