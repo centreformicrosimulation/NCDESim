@@ -29,6 +29,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     private double profit; // Sum of (productivity per worker - wage) - max(0, cost * amenity)
     private int desiredSize; // Size (number of employees) that firm wants to achieve.
     private int numberOfOffersToPost; // Number of jobs offers firm posts
+    private int age; // Firm age. For how many periods firm has existed.
 
 
     // ---------------------------------------------------------------------
@@ -90,6 +91,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         this.wage = SimulationEngine.getRnd().nextDouble();
         this.costOfAmenity = calculateCostOfAmenity();
         this.desiredSize = model.getInitialNumberOfPersons()/model.getInitialNumberOfFirms();
+        this.age = 0;
     }
 
     // Constructor to clone firms. Note that firms' characteristics are cloned, but not relationships to employees etc.
@@ -100,23 +102,23 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         this.wage = originalFirm.wage;
         this.costOfAmenity = originalFirm.costOfAmenity;
         this.desiredSize = originalFirm.desiredSize;
+        this.age = 0;
     }
 
     public AbstractFirm(AbstractFirm originalFirm, boolean withNoise) {
         super();
         if (withNoise) {
-            this.employeesSet = new TreeSet<>(); // originalFirm is cloned, but cannot clone the employees
-            this.amenity = originalFirm.amenity * SimulationEngine.getRnd().nextDouble(0.8, 1);
-            this.wage = originalFirm.wage * SimulationEngine.getRnd().nextDouble(0.8, 1);
-            this.costOfAmenity = originalFirm.costOfAmenity * SimulationEngine.getRnd().nextDouble(0.8, 1);;
-            this.desiredSize = originalFirm.desiredSize;
+            this.amenity = originalFirm.amenity * SimulationEngine.getRnd().nextDouble(1-model.getNoiseAmount(), 1+model.getNoiseAmount());
+            this.wage = originalFirm.wage * SimulationEngine.getRnd().nextDouble(1-model.getNoiseAmount(), 1+model.getNoiseAmount());
+            this.costOfAmenity = originalFirm.costOfAmenity * SimulationEngine.getRnd().nextDouble(1-model.getNoiseAmount(), 1+model.getNoiseAmount());;
         } else {
-            this.employeesSet = new TreeSet<>(); // originalFirm is cloned, but cannot clone the employees
             this.amenity = originalFirm.amenity;
             this.wage = originalFirm.wage;
             this.costOfAmenity = originalFirm.costOfAmenity;
-            this.desiredSize = originalFirm.desiredSize;
         }
+        this.desiredSize = originalFirm.desiredSize;
+        this.employeesSet = new TreeSet<>(); // originalFirm is cloned, but cannot clone the employees
+        this.age = 0;
     }
 
     // ---------------------------------------------------------------------
@@ -127,6 +129,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
      * Update method refreshes values of firm variables.
      */
     public void update() {
+        age++; // Increment age by 1
         profit = calculateProfit();
     }
 
@@ -156,7 +159,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         return profit;
     }
     public double calculateCostOfAmenity() {
-        if (Parameters.AMENITY_COST_FLOOR_AT_ZERO) {
+        if (model.amenityCostFloorAtZero) {
             return Math.max(0, amenity * model.getAmenityUnitCost()); // Calculate cost of providing the amenity with a floor at zero
         } else return amenity * model.getAmenityUnitCost(); // Calculate unrestricted cost of providing amenity. This implies that providing a dis-amenity increases firm's profit.
     }

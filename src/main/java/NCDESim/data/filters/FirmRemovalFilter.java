@@ -1,8 +1,7 @@
 package NCDESim.data.filters;
 
-import NCDESim.data.Parameters;
-import org.apache.commons.collections4.Predicate;
 import NCDESim.model.AbstractFirm;
+import org.apache.commons.collections4.Predicate;
 
 /**
  * Class for removing firms based on certain criteria.
@@ -10,6 +9,14 @@ import NCDESim.model.AbstractFirm;
  * @param <T> The type of firm to filter, must extend the AbstractFirm class.
  */
 public class FirmRemovalFilter<T extends AbstractFirm> implements Predicate<T> {
+
+    private final int firmMinimumSize;
+    private final double firmMinimumProfit;
+
+    public FirmRemovalFilter(int firmMinimumSize, double firmMinimumProfit) {
+        this.firmMinimumSize = firmMinimumSize;
+        this.firmMinimumProfit = firmMinimumProfit;
+    }
 
     /**
      * Evaluates a firm to determine if it should be removed.
@@ -27,8 +34,8 @@ public class FirmRemovalFilter<T extends AbstractFirm> implements Predicate<T> {
             throw new IllegalArgumentException("The firm argument cannot be null.");
         }
 
-        return ((firm.getEmployeesSet().size() <= Parameters.FIRM_MINIMUM_SIZE)  // Firms with no employees are removed
-                || (firm.getProfit() <= Parameters.FIRM_MINIMUM_PROFIT) // Firms with no profits are removed
+        return ((firm.getEmployeesSet().size() <= firmMinimumSize)  // Firms with no employees are removed
+                || (firm.getProfit() <= firmMinimumProfit) // Firms with no profits are removed
         );
     }
 }

@@ -1,6 +1,7 @@
 package NCDESim.model;
 
 import NCDESim.algorithms.Helpers;
+import NCDESim.data.enums.UtilityFunctions;
 import NCDESim.data.filters.FirmRemovalFilter;
 import NCDESim.data.filters.IndividualCanLookForJobFilter;
 import NCDESim.data.filters.PersonRemovalFilter;
@@ -59,6 +60,29 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Search intensity employed")
     Integer searchIntensityEmployed = 1;
     double desiredFirmSize = initialNumberOfPersons/initialNumberOfFirms;
+    @GUIparameter(description = "Remove persons from the simulation when they reach this age")
+    Integer personRemovalAge = 60;
+    @GUIparameter(description = "Maximum potential age, used in normalisation of health score")
+    Integer personMaximumPotentialAge = 80;
+    @GUIparameter(description = "Remove firms with profits smaller or equal to this value")
+    Double firmMinimumProfit = 0.;
+    @GUIparameter(description = "Remove firms with number of employees smaller or equal to this value")
+    Integer firmMinimumSize = 0;
+    @GUIparameter(description = "Utility function used to calculate person's well-being.")
+    UtilityFunctions utilityFunction = UtilityFunctions.CobbDouglas;
+    @GUIparameter(description = "Total Factor Productivity for the CB Utility")
+    Double cobbDouglasTFP = 1.;
+    @GUIparameter(description = "Parameter Alpha for the CB Utility")
+    Double cobbDouglasAlpha = 0.5;
+    Double CobbDouglasUtilityBeta = 1 - cobbDouglasAlpha; // Parameter Beta for the CB Utility
+    @GUIparameter(description = "Set to true to restrict the firm's cost of providing amenity from the bottom at zero. If false, firms providing negative amenity (dis-amenity) increase their profits.")
+    boolean amenityCostFloorAtZero = false;
+    @GUIparameter(description = "If true, individuals whose health equals zero will be removed from the simulation")
+    boolean zeroHealthDeath = true;
+    @GUIparameter(description = "Search intensity. Defines the maximum number of jobs a person can sample.")
+    Integer maximumNumberOfJobsSampled = 10;
+    @GUIparameter(description = "Amount of noise +- 1 used when creating new firms.")
+    Double noiseAmount = 0.1;
 
     private int time;
     private List<Person> individuals;
@@ -75,12 +99,14 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         if (fixRandomSeed)                                        // If fixed, the model will follow the same trajectory as other executions withe same random number seed.
             SimulationEngine.getRnd().setSeed(seedIfFixed);
 
+        checkParameters(); // Check that specified parameter values meet the conditions we impose
         createAgents();
 //		loadAgentsFromDatabase(); //Can be used instead of createAgents() to load agents from h2 database
 
         createAuxiliaryObjects(); // Initialize jobList
 
     }
+
 
     public void buildSchedule() {
 
@@ -272,7 +298,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
     private void removeFirms() {
         List<AbstractFirm> firmsToRemove = new ArrayList<>();
-        CollectionUtils.select(getFirms(), new FirmRemovalFilter<>(), firmsToRemove);
+        CollectionUtils.select(getFirms(), new FirmRemovalFilter<>(firmMinimumSize, firmMinimumProfit), firmsToRemove);
         numberOfFirmsDestroyed = firmsToRemove.size();
         Iterator<AbstractFirm> itr = firmsToRemove.iterator();
         while (itr.hasNext()) {
@@ -285,7 +311,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
     private void removePersons() {
         ArrayList<Person> personsToRemove = new ArrayList<>();
-        CollectionUtils.select(getIndividuals(), new PersonRemovalFilter<>(), personsToRemove);
+        CollectionUtils.select(getIndividuals(), new PersonRemovalFilter<>(personRemovalAge, zeroHealthDeath), personsToRemove);
         Iterator<Person> itr = personsToRemove.iterator();
         while (itr.hasNext()) {
             Person person = itr.next();
@@ -307,6 +333,26 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     protected void loadAgentsFromDatabase() {
         //Load agents from an input/input.h2.db database containing the Person table (if there is one).
         individuals = (List<Person>) DatabaseUtils.loadTable(Person.class);
+    }
+
+    /**
+     * checkParameters() method verifies that parameters meet requirements specified below, such as:
+     * 1) Number of firms cannot exceed the number of individuals
+     */
+    private void checkParameters() throws IllegalArgumentException {
+        if (initialNumberOfFirms > initialNumberOfPersons) throw new IllegalArgumentException("Initial number of firms must not exceed the initial number of persons. Increase the number of persons or lower the number of firms.");
+    }
+
+    public double evaluateUtilityFunction(double health, double wage) { // This utility function is used to calculate person's well-being. Job offers are evaluated according to the level of well-being they generate.
+
+        switch (utilityFunction) {
+            case CobbDouglas -> {
+                return cobbDouglasTFP * Math.pow(health, cobbDouglasAlpha) * Math.pow(wage, CobbDouglasUtilityBeta);
+            }
+            default -> {
+                return 0;
+            }
+        }
     }
 
     // ---------------------------------------------------------------------

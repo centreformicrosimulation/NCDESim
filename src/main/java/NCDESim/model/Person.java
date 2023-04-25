@@ -1,7 +1,6 @@
 package NCDESim.model;
 
 import NCDESim.algorithms.Helpers;
-import NCDESim.data.Parameters;
 import NCDESim.model.objects.Job;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -49,7 +48,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	//	this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
 		this.productivity = 1; // Homogenous productivity
 		this.job = new Job(null, 0., 0.); // Job of the person
-		this.searchIntensity = SimulationEngine.getRnd().nextInt(Parameters.MAXIMUM_NUMBER_OF_JOBS_SAMPLED_BY_PERSON)+1; // Only used if turned on in Parameters
+		this.searchIntensity = SimulationEngine.getRnd().nextInt(model.maximumNumberOfJobsSampled)+1; // Only used if turned on in the GUI / model
 
 		// Initialise flag variables
 		this.flagChangedJobs = false; // Indicates if individual who was employed changed jobs
@@ -159,7 +158,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	//	double currentHealthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), age) - 1) + job.getAmenity()), 1);
 	//	double maximumPotentialAgeHealthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), 80) - 1) + job.getAmenity()), 1);
 
-		double maximumPotentialHealthDecay = (Math.pow(1 + model.getHealthDecay(), Parameters.PERSON_MAXIMUM_POTENTIAL_AGE) - 1); // Normalisation factor based on maximum possible health decay
+		double maximumPotentialHealthDecay = (Math.pow(1 + model.getHealthDecay(), model.getPersonMaximumPotentialAge()) - 1); // Normalisation factor based on maximum possible health decay
 		double currentHealthDecay = (Math.pow(1 + model.getHealthDecay(), age) - 1);
 		double normalisedHealthDecay = currentHealthDecay/maximumPotentialHealthDecay;
 		health = Math.min((health_L1 - normalisedHealthDecay + job.getAmenity()), 1); // Health score with normalised health decay
@@ -174,7 +173,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	}
 
 	public double calculateUtility() { // Utility is also referred to as well-being in the model
-		return Parameters.evaluateUtilityFunction(health, job.getWage());
+		return model.evaluateUtilityFunction(health, job.getWage());
 	}
 
 	/**
@@ -202,7 +201,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			Job selectedJob = findJobWithHighestUtility(utilityOfSampledJobsMap); // Choose the job providing maximum utility to the person, from the list of sampled jobs.
 			Job currentJob = this.job;
 			if (job.getEmployer() != null && model.onTheJobSearch) {
-				if (Parameters.evaluateUtilityFunction(health, selectedJob.getWage()) > Parameters.evaluateUtilityFunction(health, currentJob.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
+				if (model.evaluateUtilityFunction(health, selectedJob.getWage()) > model.evaluateUtilityFunction(health, currentJob.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
 					updateEmployment(selectedJob); // Set person's job.
 
 					if (!model.destroyJobs) { // If destroyJobs parameter is set to false, the job that individual leaves is added to the list from which other individuals can sample jobs
@@ -241,7 +240,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		for (Job j : listOfJobs) {
 			double health = this.health;
 			double wage = j.getWage();
-			double utility = Parameters.evaluateUtilityFunction(health, wage);
+			double utility = model.evaluateUtilityFunction(health, wage);
 			jobUtilityMapToReturn.put(j, utility);
 		}
 		return jobUtilityMapToReturn;
