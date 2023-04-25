@@ -59,7 +59,8 @@ public class NCDESimMultiRun extends MultiRun {
 		//No need to add observer if running in batch mode
 
 		// Overwrite the default values of the parameters of the simulation
-		collector.setExportToCSV(true); // Write outputs to CSV
+		collector.setExportMicrodataToCSV(true); // Write microdata outputs to CSV
+		collector.setExportAggregateStatisticsToCSV(true); // Write aggregate statistics output to CSV
 		model.setInitialNumberOfPersons(numberOfPersons);
 		model.setShareOfNewFirmsCloned(shareOfNewFirmsCloned);
 	}

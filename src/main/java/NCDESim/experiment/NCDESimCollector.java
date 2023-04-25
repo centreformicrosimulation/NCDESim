@@ -1,5 +1,6 @@
 package NCDESim.experiment;
 
+import NCDESim.model.NCDESimModel;
 import NCDESim.model.Person;
 import NCDESim.model.SimulationStatistics;
 import lombok.Getter;
@@ -12,13 +13,11 @@ import microsim.engine.SimulationManager;
 import microsim.event.EventGroup;
 import microsim.event.EventListener;
 import microsim.event.Order;
-
 import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.MeanArrayFunction;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
-
-import NCDESim.model.NCDESimModel;
 
 @Getter
 @Setter
@@ -27,9 +26,10 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 	private final static Logger log = Logger.getLogger(NCDESimCollector.class);
 
-	@GUIparameter(description = "Toggle to export snapshot to .csv files")
-	boolean exportToCSV = false;				//If true, data will be recorded to .csv files in the output directory
-
+	@GUIparameter(description = "Toggle to export snapshot of microdata to .csv files")
+	boolean exportMicrodataToCSV = false;				//If true, microdata will be recorded to .csv files in the output directory
+	@GUIparameter(description = "Toggle to export snapshot of aggregate statistics to .csv files")
+	boolean exportAggregateStatisticsToCSV = true;				//If true, aggregate data will be recorded to .csv files in the output directory
 	@GUIparameter(description = "Toggle to export snapshot to output database")
 	boolean exportToDatabase = false;		//If true, data will be recorded in the output database in the output directory
 
@@ -49,9 +49,10 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	private NCDESimModel model;
 
 	// Variables defined below are more complicated aggregate statistics, which are first calculated by the collector and then recorded in the Statistics .csv file
-	private CrossSection.Integer employedCS, jobChangingCS;
+	private CrossSection.Integer employedCS, jobChangingCS, personAgeCS;
 	private MeanArrayFunction employmentRateMAF, jobChangingRateMAF;
 	private double outcome_employmentRate, outcome_jobChangingRate; // Employment rate in the model, calculated as share of individuals in employment among all individuals (employed and unemployed: there are two states in the model)
+	private double outcome_person_age_mean, outcome_person_age_median, outcome_person_age_min, outcome_person_age_max, outcome_person_age_sd, outcome_person_age_kurtosis, outcome_person_age_skewness;
 
 	// ---------------------------------------------------------------------
 	// Constructor
@@ -71,9 +72,9 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 		statistics = new SimulationStatistics();
 
-		exportIndividuals = new DataExport(model.getIndividuals(), exportToDatabase, exportToCSV);
-		exportFirmsTypeA = new DataExport(model.getFirms(), exportToDatabase, exportToCSV);
-		exportStatistics = new DataExport(statistics, exportToDatabase, exportToCSV);
+		exportIndividuals = new DataExport(model.getIndividuals(), exportToDatabase, exportMicrodataToCSV);
+		exportFirmsTypeA = new DataExport(model.getFirms(), exportToDatabase, exportMicrodataToCSV);
+		exportStatistics = new DataExport(statistics, exportToDatabase, exportAggregateStatisticsToCSV);
 
 		log.debug("Collector objects created");	}
 
@@ -148,19 +149,36 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 		// Employment rate
 		employedCS = new CrossSection.Integer(model.getIndividuals(), Person.IntegerVariables.IsEmployed);
-		employedCS.updateSource();
-		employmentRateMAF = new MeanArrayFunction(employedCS);
-		employmentRateMAF.applyFunction();
-		outcome_employmentRate = employmentRateMAF.getDoubleValue(IDoubleSource.Variables.Default);
+		outcome_employmentRate = calculateRateIntCS(employedCS);
 
 		// Job changing rate
 		jobChangingCS = new CrossSection.Integer(model.getIndividuals(), Person.IntegerVariables.ChangedJobs);
-		jobChangingCS.updateSource();
-		jobChangingRateMAF = new MeanArrayFunction(jobChangingCS);
-		jobChangingRateMAF.applyFunction();
-		outcome_jobChangingRate = jobChangingRateMAF.getDoubleValue(IDoubleSource.Variables.Default);
+		outcome_jobChangingRate = calculateRateIntCS(jobChangingCS);
 
+		// Person age distribution
+		personAgeCS = new CrossSection.Integer(model.getIndividuals(), Person.IntegerVariables.Age);
+		personAgeCS.updateSource();
+		DescriptiveStatistics dsPersonAge = new DescriptiveStatistics(personAgeCS.getDoubleArray());
+		outcome_person_age_mean = dsPersonAge.getMean();
+		outcome_person_age_median = dsPersonAge.getPercentile(50);
+		outcome_person_age_min = dsPersonAge.getMin();
+		outcome_person_age_max = dsPersonAge.getMax();
+		outcome_person_age_sd = dsPersonAge.getStandardDeviation();
+		outcome_person_age_kurtosis = dsPersonAge.getKurtosis();
+		outcome_person_age_skewness = dsPersonAge.getSkewness();
 
+	}
+
+	/**
+	 * This method calculates a rate (e.g. rate of employment) on the provided Integer Cross-section of data
+	 * @param crossSectionOfData
+	 * @return
+	 */
+	private double calculateRateIntCS(CrossSection.Integer crossSectionOfData) {
+		crossSectionOfData.updateSource();
+		MeanArrayFunction MAFonCS = new MeanArrayFunction(crossSectionOfData);
+		MAFonCS.applyFunction();
+		return MAFonCS.getDoubleValue(IDoubleSource.Variables.Default);
 	}
 
 
@@ -185,6 +203,15 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		statistics.setOutcome_numberOfFirms(model.getIntValue(NCDESimModel.IntVariables.NumberOfFirms));
 		statistics.setOutcome_employmentRate(outcome_employmentRate); // This is first calculated by the collector and stored in outcome_employment_rate variable
 		statistics.setOutcome_jobChangingRate(outcome_jobChangingRate); // Job changing rate is calculated by the collector, similarly to employment rate
+
+		// About distribution of person age
+		statistics.setOutcome_person_age_mean(outcome_person_age_mean);
+		statistics.setOutcome_person_age_median(outcome_person_age_median);
+		statistics.setOutcome_person_age_min(outcome_person_age_min);
+		statistics.setOutcome_person_age_max(outcome_person_age_max);
+		statistics.setOutcome_person_age_sd(outcome_person_age_sd);
+		statistics.setOutcome_person_age_kurtosis(outcome_person_age_kurtosis);
+		statistics.setOutcome_person_age_skewness(outcome_person_age_skewness);
 	}
 
 

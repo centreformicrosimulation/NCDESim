@@ -29,6 +29,7 @@ public class SimulationStatistics {
     // Aggregate model statistics
     private int outcome_numberOfPersons, outcome_numberOfFirms, outcome_numberOfAdvertisedJobs;
     private double outcome_employmentRate, outcome_jobChangingRate;
+    private double outcome_person_age_mean, outcome_person_age_median, outcome_person_age_min, outcome_person_age_max, outcome_person_age_sd, outcome_person_age_kurtosis, outcome_person_age_skewness;
 
     // ---------------------------------------------------------------------
     // Constructor

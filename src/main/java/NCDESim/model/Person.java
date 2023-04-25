@@ -85,6 +85,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	// ---------------------------------------------------------------------
 
 	public enum IntegerVariables {
+		Age,
 		ChangedJobs,
 		IsEmployed,
 	}
@@ -92,6 +93,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	@Override
 	public int getIntValue(Enum<?> variable) {
 		return switch ((IntegerVariables) variable) {
+			case Age -> getAge();
 			case ChangedJobs -> (flagChangedJobs) ? 1 : 0;
 			case IsEmployed -> (job.getEmployer() != null) ? 1 : 0;
 		};
