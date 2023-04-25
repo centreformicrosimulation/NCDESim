@@ -1,6 +1,5 @@
 package NCDESim.model;
 
-import NCDESim.data.Parameters;
 import NCDESim.model.objects.Job;
 import jakarta.persistence.Transient;
 import lombok.Getter;
@@ -49,12 +48,14 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     // ---------------------------------------------------------------------
 
     public enum IntegerVariables {
+        Age,
         JobsPosted,
     }
 
     @Override
     public int getIntValue(Enum<?> variable) {
         return switch ((AbstractFirm.IntegerVariables) variable) {
+            case Age -> getAge();
             case JobsPosted -> numberOfOffersToPost;
         };
     }

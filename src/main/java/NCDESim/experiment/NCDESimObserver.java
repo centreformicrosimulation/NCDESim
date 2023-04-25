@@ -57,7 +57,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth, scatterIndividualHealthWages, scatterIndividualWagesAmenities, scatterIndividualWagesAmenitiesCS;
 	private ScatterplotTest csScatterIndividualHealthUtility, csScatterIndividualAmenityHealth, csScatterIndividualHealthWages, csScatterIndividualWagesAmenities, csScatterIndividualWagesAmenitiesCS;
 
-	private HistogramSimulationPlotter amenitiesHist, wagesHist, utilityHist, profitsHist, sizeHist;
+	private HistogramSimulationPlotter amenitiesHist, wagesHist, utilityHist, profitsHist, sizeHist, firmAgeHist;
 
 	public NCDESimObserver(SimulationManager manager, SimulationCollectorManager collectorManager) {
 		super(manager, collectorManager);
@@ -271,6 +271,14 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			sizeHist = new HistogramSimulationPlotter("Firm size histogram", "Size", HistogramType.FREQUENCY, 100);
 			sizeHist.addCollectionSource("Size", sizeCS);
 			addChart(sizeHist, "HIST Firm size");
+
+			/*
+			 * HISTOGRAM OF FIRM AGE
+			 */
+			CrossSection.Integer firmAgeCS = new CrossSection.Integer(model.getFirms(), AbstractFirm.IntegerVariables.Age);
+			firmAgeHist = new HistogramSimulationPlotter("Firm age histogram", "Age", HistogramType.FREQUENCY, 100);
+			firmAgeHist.addCollectionSource("Age", firmAgeCS);
+			addChart(firmAgeHist, "HIST Firm age");
 
 			// Add individual-level graphs
 			if (showIndividualGraphs) {
