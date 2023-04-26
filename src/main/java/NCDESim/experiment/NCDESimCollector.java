@@ -37,10 +37,8 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	boolean exportAggregateStatisticsToCSV = true;				//If true, aggregate data will be recorded to .csv files in the output directory
 	@GUIparameter(description = "Toggle to export snapshot to output database")
 	boolean exportToDatabase = false;		//If true, data will be recorded in the output database in the output directory
-
 	@GUIparameter(description = "Set the time at which to start exporting snapshots to the database and/or .csv files")
 	Double timeOfFirstSnapshot = 0.;
-
 	@GUIparameter(description = "Set the time between snapshots to be exported to the database and/or .csv files")
 	Double timeStepsBetweenSnapshots = 1.;
 
@@ -55,7 +53,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 	// Variables defined below are more complicated aggregate statistics, which are first calculated by the collector and then recorded in the Statistics .csv file
 	private CrossSection.Integer employedCS, jobChangingCS;
-	private CrossSection.Double personAgeCS, personHealthCS, personProductivityCS, personUtilityCS, personSearchIntensityCS, personAmenitiesCS, personWageCS;
+	private CrossSection.Double personAgeCS, personHealthCS, personProductivityCS, personUtilityCS, personAmenitiesCS, personWageCS;
 	private CrossSection.Double firmAgeCS, firmJobsPostedCS, firmProfitCS, firmSizeCS;
 	private MeanArrayFunction employmentRateMAF, jobChangingRateMAF;
 	private double outcome_employmentRate, outcome_jobChangingRate; // Employment rate in the model, calculated as share of individuals in employment among all individuals (employed and unemployed: there are two states in the model)
@@ -64,7 +62,6 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	private double outcome_person_health_mean, outcome_person_health_median, outcome_person_health_min, outcome_person_health_max, outcome_person_health_sd, outcome_person_health_kurtosis, outcome_person_health_skewness;
 	private double outcome_person_productivity_mean, outcome_person_productivity_median, outcome_person_productivity_min, outcome_person_productivity_max, outcome_person_productivity_sd, outcome_person_productivity_kurtosis, outcome_person_productivity_skewness;
 	private double outcome_person_utility_mean, outcome_person_utility_median, outcome_person_utility_min, outcome_person_utility_max, outcome_person_utility_sd, outcome_person_utility_kurtosis, outcome_person_utility_skewness;
-	private double outcome_person_search_intensity_mean, outcome_person_search_intensity_median, outcome_person_search_intensity_min, outcome_person_search_intensity_max, outcome_person_search_intensity_sd, outcome_person_search_intensity_kurtosis, outcome_person_search_intensity_skewness;
 	private double outcome_person_amenity_mean, outcome_person_amenity_median, outcome_person_amenity_min, outcome_person_amenity_max, outcome_person_amenity_sd, outcome_person_amenity_kurtosis, outcome_person_amenity_skewness;
 	private double outcome_person_wage_mean, outcome_person_wage_median, outcome_person_wage_min, outcome_person_wage_max, outcome_person_wage_sd, outcome_person_wage_kurtosis, outcome_person_wage_skewness;
 
@@ -192,9 +189,6 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		// Individual utility distribution
 		personUtilityCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Utility);
 
-		// Individual search intensity distribution
-		personSearchIntensityCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.SearchIntensity);
-
 		// Individual job amenity distribution
 		personAmenitiesCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Amenities);
 
@@ -283,12 +277,26 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		statistics.setParameter_perYearNumberOfPersons(model.getPerYearNumberOfPersons());
 		statistics.setParameter_numberOfFirmsInitial(model.getInitialNumberOfFirms());
 		statistics.setParameter_shareOfNewFirmsCloned(model.getShareOfNewFirmsCloned());
+		statistics.setParameter_clone_firms_with_noise(model.isCloneWithNoise());
+		statistics.setParameter_noise_amount(model.getNoiseAmount());
 		statistics.setParameter_endTime(model.getEndTime());
 		statistics.setParameter_amenityCostMultiplier(model.getAmenityUnitCost());
 		statistics.setParameter_healthDecayLambda(model.getHealthDecay());
 		statistics.setParameter_onTheJobSearch(model.isOnTheJobSearch());
+		statistics.setParameter_on_the_job_search_destroy_jobs(model.isDestroyJobs());
 		statistics.setParameter_searchIntensityEmployed(model.getSearchIntensityEmployed());
-		statistics.setParameterSearchIntensityUnemployed(model.getSearchIntensityUnemployed());
+		statistics.setParameter_SearchIntensityUnemployed(model.getSearchIntensityUnemployed());
+		statistics.setParameter_desired_firm_size(model.getDesiredFirmSize());
+		statistics.setParameter_person_removal_age(model.getPersonRemovalAge());
+		statistics.setParameter_person_maximum_potential_age(model.getPersonMaximumPotentialAge());
+		statistics.setParameter_firm_minimum_size(model.getFirmMinimumSize());
+		statistics.setParameter_firm_minimum_profit(model.getFirmMinimumProfit());
+		statistics.setParameter_utility_function(model.getUtilityFunction());
+		statistics.setParameter_cobb_douglas_TFP(model.getCobbDouglasTFP());
+		statistics.setParameter_cobb_douglas_alpha(model.getCobbDouglasAlpha());
+		statistics.setParameter_amenity_cost_floor_at_zero(model.isAmenityCostFloorAtZero());
+		statistics.setParameter_zero_health_death(model.isZeroHealthDeath());
+
 
 		// Model outcomes
 		statistics.setOutcome_numberOfPersons(model.getIntValue(NCDESimModel.IntVariables.NumberOfPersons));
@@ -307,9 +315,6 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 		// About distribution of individual utility
 		setDistributionalStats(statistics, personUtilityCS, "outcome_person_utility");
-
-		// About distribution of individual search intensity
-		setDistributionalStats(statistics, personSearchIntensityCS, "outcome_person_search_intensity");
 
 		// About distribution of individual job amenities
 		setDistributionalStats(statistics, personAmenitiesCS, "outcome_person_amenities");

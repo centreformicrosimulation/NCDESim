@@ -29,7 +29,6 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	private double health, health_L1;
 	private double productivity, productivity_L1;
 	private double utility;
-	private int searchIntensity;
 	@Transient
 	private Job job;
 	private boolean flagChangedJobs;
@@ -48,7 +47,6 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 	//	this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
 		this.productivity = 1; // Homogenous productivity
 		this.job = new Job(null, 0., 0.); // Job of the person
-		this.searchIntensity = SimulationEngine.getRnd().nextInt(model.maximumNumberOfJobsSampled)+1; // Only used if turned on in the GUI / model
 
 		// Initialise flag variables
 		this.flagChangedJobs = false; // Indicates if individual who was employed changed jobs
@@ -109,7 +107,6 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		Count,
 		Health,
 		Productivity,
-		SearchIntensity,
 		Utility,
 		Wage,
 		TestVar1,
@@ -124,7 +121,6 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			case Count -> 1.;
 			case Health -> health;
 			case Productivity -> productivity;
-			case SearchIntensity -> searchIntensity;
 			case Wage -> job.getWage();
 			case Utility -> utility;
 			case TestVar1 -> testVar1;

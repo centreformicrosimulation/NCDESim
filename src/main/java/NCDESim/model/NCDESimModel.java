@@ -79,8 +79,6 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     boolean amenityCostFloorAtZero = false;
     @GUIparameter(description = "If true, individuals whose health equals zero will be removed from the simulation")
     boolean zeroHealthDeath = true;
-    @GUIparameter(description = "Search intensity. Defines the maximum number of jobs a person can sample.")
-    Integer maximumNumberOfJobsSampled = 10;
     @GUIparameter(description = "Amount of noise +- 1 used when creating new firms.")
     Double noiseAmount = 0.1;
 
