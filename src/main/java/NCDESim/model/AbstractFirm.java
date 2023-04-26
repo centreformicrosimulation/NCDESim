@@ -64,8 +64,10 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     // IDoubleSource
     // ---------------------------------------------------------------------
     public enum Variables{
+        Age,
         AmenitiesLevel,
         Count,
+        JobsPosted,
         Profit,
         Size,
         Wages,
@@ -73,8 +75,10 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
     @Override
     public double getDoubleValue(Enum<?> variable) {
         return switch ((Variables) variable) {
+            case Age -> getAge();
             case AmenitiesLevel -> getAmenity();
             case Count -> 1.;
+            case JobsPosted -> numberOfOffersToPost;
             case Profit -> profit;
             case Size -> getEmployeesSet().size();
             case Wages -> wage;

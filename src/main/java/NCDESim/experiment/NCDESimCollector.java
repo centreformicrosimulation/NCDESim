@@ -1,5 +1,6 @@
 package NCDESim.experiment;
 
+import NCDESim.model.AbstractFirm;
 import NCDESim.model.NCDESimModel;
 import NCDESim.model.Person;
 import NCDESim.model.SimulationStatistics;
@@ -55,8 +56,10 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	// Variables defined below are more complicated aggregate statistics, which are first calculated by the collector and then recorded in the Statistics .csv file
 	private CrossSection.Integer employedCS, jobChangingCS;
 	private CrossSection.Double personAgeCS, personHealthCS, personProductivityCS, personUtilityCS, personSearchIntensityCS, personAmenitiesCS, personWageCS;
+	private CrossSection.Double firmAgeCS, firmJobsPostedCS, firmProfitCS, firmSizeCS;
 	private MeanArrayFunction employmentRateMAF, jobChangingRateMAF;
 	private double outcome_employmentRate, outcome_jobChangingRate; // Employment rate in the model, calculated as share of individuals in employment among all individuals (employed and unemployed: there are two states in the model)
+
 	private double outcome_person_age_mean, outcome_person_age_median, outcome_person_age_min, outcome_person_age_max, outcome_person_age_sd, outcome_person_age_kurtosis, outcome_person_age_skewness;
 	private double outcome_person_health_mean, outcome_person_health_median, outcome_person_health_min, outcome_person_health_max, outcome_person_health_sd, outcome_person_health_kurtosis, outcome_person_health_skewness;
 	private double outcome_person_productivity_mean, outcome_person_productivity_median, outcome_person_productivity_min, outcome_person_productivity_max, outcome_person_productivity_sd, outcome_person_productivity_kurtosis, outcome_person_productivity_skewness;
@@ -65,7 +68,11 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	private double outcome_person_amenity_mean, outcome_person_amenity_median, outcome_person_amenity_min, outcome_person_amenity_max, outcome_person_amenity_sd, outcome_person_amenity_kurtosis, outcome_person_amenity_skewness;
 	private double outcome_person_wage_mean, outcome_person_wage_median, outcome_person_wage_min, outcome_person_wage_max, outcome_person_wage_sd, outcome_person_wage_kurtosis, outcome_person_wage_skewness;
 
-	private HashMap<String, Double> personSearchIntensityStats;
+	private double outcome_firm_age_mean, outcome_firm_age_median, outcome_firm_age_min, outcome_firm_age_max, outcome_firm_age_sd, outcome_firm_age_kurtosis, outcome_firm_age_skewness;
+	private double outcome_firm_jobs_posted_mean, outcome_firm_jobs_posted_median, outcome_firm_jobs_posted_min, outcome_firm_jobs_posted_max, outcome_firm_jobs_posted_sd, outcome_firm_jobs_posted_kurtosis, outcome_firm_jobs_posted_skewness;
+	private double outcome_firm_profit_mean, outcome_firm_profit_median, outcome_firm_profit_min, outcome_firm_profit_max, outcome_firm_profit_sd, outcome_firm_profit_kurtosis, outcome_firm_profit_skewness;
+	private double outcome_firm_size_mean, outcome_firm_size_median, outcome_firm_size_min, outcome_firm_size_max, outcome_firm_size_sd, outcome_firm_size_kurtosis, outcome_firm_size_skewness;
+
 
 	// ---------------------------------------------------------------------
 	// Constructor
@@ -194,6 +201,18 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		// Individual wage distribution
 		personWageCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Wage);
 
+		// Firm age distribution
+		firmAgeCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Age);
+
+		// Firm jobs posted distribution
+		firmJobsPostedCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.JobsPosted);
+
+		// Firm profit distribution
+		firmProfitCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Profit);
+
+		// Firm size distribution
+		firmSizeCS = new CrossSection.Double(model.getFirms(), AbstractFirm.Variables.Size);
+
 	}
 
 	/**
@@ -297,6 +316,18 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 
 		// About distribution of individual wage
 		setDistributionalStats(statistics, personWageCS, "outcome_person_wage");
+
+		// About distribution of firm age
+		setDistributionalStats(statistics, firmAgeCS, "outcome_firm_age");
+
+		// About distribution of number of jobs posted by firms
+		setDistributionalStats(statistics, firmJobsPostedCS, "outcome_firm_jobs_posted");
+
+		// About distribution of firm profit
+		setDistributionalStats(statistics, firmProfitCS, "outcome_firm_profit");
+
+		// About distribution of firm size
+		setDistributionalStats(statistics, firmSizeCS, "outcome_firm_size");
 	}
 
 

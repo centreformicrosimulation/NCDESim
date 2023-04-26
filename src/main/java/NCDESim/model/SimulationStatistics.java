@@ -28,6 +28,7 @@ public class SimulationStatistics {
 
     // Aggregate model statistics
     private int outcome_numberOfPersons, outcome_numberOfFirms, outcome_numberOfAdvertisedJobs;
+
     private double outcome_employmentRate, outcome_jobChangingRate;
     private double outcome_person_age_mean, outcome_person_age_median, outcome_person_age_min, outcome_person_age_max, outcome_person_age_sd, outcome_person_age_kurtosis, outcome_person_age_skewness;
     private double outcome_person_health_mean, outcome_person_health_median, outcome_person_health_min, outcome_person_health_max, outcome_person_health_sd, outcome_person_health_kurtosis, outcome_person_health_skewness;
@@ -36,6 +37,11 @@ public class SimulationStatistics {
     private double outcome_person_search_intensity_mean, outcome_person_search_intensity_median, outcome_person_search_intensity_min, outcome_person_search_intensity_max, outcome_person_search_intensity_sd, outcome_person_search_intensity_kurtosis, outcome_person_search_intensity_skewness;
     private double outcome_person_amenities_mean, outcome_person_amenities_median, outcome_person_amenities_min, outcome_person_amenities_max, outcome_person_amenities_sd, outcome_person_amenities_kurtosis, outcome_person_amenities_skewness;
     private double outcome_person_wage_mean, outcome_person_wage_median, outcome_person_wage_min, outcome_person_wage_max, outcome_person_wage_sd, outcome_person_wage_kurtosis, outcome_person_wage_skewness;
+
+    private double outcome_firm_age_mean, outcome_firm_age_median, outcome_firm_age_min, outcome_firm_age_max, outcome_firm_age_sd, outcome_firm_age_kurtosis, outcome_firm_age_skewness;
+    private double outcome_firm_jobs_posted_mean, outcome_firm_jobs_posted_median, outcome_firm_jobs_posted_min, outcome_firm_jobs_posted_max, outcome_firm_jobs_posted_sd, outcome_firm_jobs_posted_kurtosis, outcome_firm_jobs_posted_skewness;
+    private double outcome_firm_profit_mean, outcome_firm_profit_median, outcome_firm_profit_min, outcome_firm_profit_max, outcome_firm_profit_sd, outcome_firm_profit_kurtosis, outcome_firm_profit_skewness;
+    private double outcome_firm_size_mean, outcome_firm_size_median, outcome_firm_size_min, outcome_firm_size_max, outcome_firm_size_sd, outcome_firm_size_kurtosis, outcome_firm_size_skewness;
 
     // ---------------------------------------------------------------------
     // Constructor
