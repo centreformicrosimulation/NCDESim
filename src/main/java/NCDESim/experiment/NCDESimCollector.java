@@ -19,6 +19,10 @@ import microsim.statistics.functions.MeanArrayFunction;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 @Setter
 @ToString
@@ -49,10 +53,19 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	private NCDESimModel model;
 
 	// Variables defined below are more complicated aggregate statistics, which are first calculated by the collector and then recorded in the Statistics .csv file
-	private CrossSection.Integer employedCS, jobChangingCS, personAgeCS;
+	private CrossSection.Integer employedCS, jobChangingCS;
+	private CrossSection.Double personAgeCS, personHealthCS, personProductivityCS, personUtilityCS, personSearchIntensityCS, personAmenitiesCS, personWageCS;
 	private MeanArrayFunction employmentRateMAF, jobChangingRateMAF;
 	private double outcome_employmentRate, outcome_jobChangingRate; // Employment rate in the model, calculated as share of individuals in employment among all individuals (employed and unemployed: there are two states in the model)
 	private double outcome_person_age_mean, outcome_person_age_median, outcome_person_age_min, outcome_person_age_max, outcome_person_age_sd, outcome_person_age_kurtosis, outcome_person_age_skewness;
+	private double outcome_person_health_mean, outcome_person_health_median, outcome_person_health_min, outcome_person_health_max, outcome_person_health_sd, outcome_person_health_kurtosis, outcome_person_health_skewness;
+	private double outcome_person_productivity_mean, outcome_person_productivity_median, outcome_person_productivity_min, outcome_person_productivity_max, outcome_person_productivity_sd, outcome_person_productivity_kurtosis, outcome_person_productivity_skewness;
+	private double outcome_person_utility_mean, outcome_person_utility_median, outcome_person_utility_min, outcome_person_utility_max, outcome_person_utility_sd, outcome_person_utility_kurtosis, outcome_person_utility_skewness;
+	private double outcome_person_search_intensity_mean, outcome_person_search_intensity_median, outcome_person_search_intensity_min, outcome_person_search_intensity_max, outcome_person_search_intensity_sd, outcome_person_search_intensity_kurtosis, outcome_person_search_intensity_skewness;
+	private double outcome_person_amenity_mean, outcome_person_amenity_median, outcome_person_amenity_min, outcome_person_amenity_max, outcome_person_amenity_sd, outcome_person_amenity_kurtosis, outcome_person_amenity_skewness;
+	private double outcome_person_wage_mean, outcome_person_wage_median, outcome_person_wage_min, outcome_person_wage_max, outcome_person_wage_sd, outcome_person_wage_kurtosis, outcome_person_wage_skewness;
+
+	private HashMap<String, Double> personSearchIntensityStats;
 
 	// ---------------------------------------------------------------------
 	// Constructor
@@ -142,7 +155,8 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	// ---------------------------------------------------------------------
 	// Own methods
 	// ---------------------------------------------------------------------
-	/*
+
+	/**
 	calculateStatistics() calculates values of more complicated aggregate statistics which cannot be obtained from other classes directly. They are then recorded in the .csv file through recordStatistics() and exportStatistics
 	 */
 	private void calculateStatistics() {
@@ -155,19 +169,78 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		jobChangingCS = new CrossSection.Integer(model.getIndividuals(), Person.IntegerVariables.ChangedJobs);
 		outcome_jobChangingRate = calculateRateIntCS(jobChangingCS);
 
-		// Person age distribution
-		personAgeCS = new CrossSection.Integer(model.getIndividuals(), Person.IntegerVariables.Age);
-		personAgeCS.updateSource();
-		DescriptiveStatistics dsPersonAge = new DescriptiveStatistics(personAgeCS.getDoubleArray());
-		outcome_person_age_mean = dsPersonAge.getMean();
-		outcome_person_age_median = dsPersonAge.getPercentile(50);
-		outcome_person_age_min = dsPersonAge.getMin();
-		outcome_person_age_max = dsPersonAge.getMax();
-		outcome_person_age_sd = dsPersonAge.getStandardDeviation();
-		outcome_person_age_kurtosis = dsPersonAge.getKurtosis();
-		outcome_person_age_skewness = dsPersonAge.getSkewness();
+		/*
+		For distributional statistics below, this method prepares cross-sections with data. Statistics are calculated and stored in a single step in recordStatistics() method.
+		 */
+
+		// Individual age distribution
+		personAgeCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Age);
+
+		// Individual health distribution
+		personHealthCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Health);
+
+		// Individual productivity distribution
+		personProductivityCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Productivity);
+
+		// Individual utility distribution
+		personUtilityCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Utility);
+
+		// Individual search intensity distribution
+		personSearchIntensityCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.SearchIntensity);
+
+		// Individual job amenity distribution
+		personAmenitiesCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Amenities);
+
+		// Individual wage distribution
+		personWageCS = new CrossSection.Double(model.getIndividuals(), Person.DoubleVariables.Wage);
 
 	}
+
+	/**
+	 * Calculates the statistics for the given CrossSection object and prefix.
+	 *
+	 * @param cs     the CrossSection object for which statistics are to be calculated
+	 * @param prefix the prefix to use for the outcome variables
+	 * @return a map of the calculated statistics, with keys being the variable names and values being the corresponding statistics
+	 */
+	private HashMap<String, Double> calculateDistributionalStats(CrossSection.Double cs, String prefix) {
+		cs.updateSource();
+		DescriptiveStatistics ds = new DescriptiveStatistics(cs.getDoubleArray());
+		HashMap<String, Double> stats = new HashMap<>();
+		stats.put(prefix + "_mean", ds.getMean());
+		stats.put(prefix + "_median", ds.getPercentile(50));
+		stats.put(prefix + "_min", ds.getMin());
+		stats.put(prefix + "_max", ds.getMax());
+		stats.put(prefix + "_sd", ds.getStandardDeviation());
+		stats.put(prefix + "_kurtosis", ds.getKurtosis());
+		stats.put(prefix + "_skewness", ds.getSkewness());
+		return stats;
+	}
+
+	/**
+	 * Sets the given statistics object with the calculated statistics for the given CrossSection object and prefix.
+	 *
+	 * @param statistics the statistics object to set with calculated statistics
+	 * @param cs         the CrossSection object for which statistics are to be calculated
+	 * @param prefix     the prefix to use for the outcome variables in the statistics object
+	 */
+	private void setDistributionalStats(SimulationStatistics statistics, CrossSection.Double cs, String prefix) {
+		HashMap<String, Double> stats = calculateDistributionalStats(cs, prefix.toLowerCase());
+		for (Map.Entry<String, Double> entry : stats.entrySet()) {
+			try {
+				Method[] methods = statistics.getClass().getMethods();
+				for (Method method : methods) {
+					if (method.getName().equalsIgnoreCase("set" + entry.getKey())) {
+						method.invoke(statistics, entry.getValue());
+						break;
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 	/**
 	 * This method calculates a rate (e.g. rate of employment) on the provided Integer Cross-section of data
@@ -182,7 +255,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 	}
 
 
-	/*
+	/**
 	recordStatistics() sets values of fields defined in SimulationStatistics class. These are then output to Statistics Excel file.
 	 */
 	private void recordStatistics() {
@@ -204,14 +277,26 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		statistics.setOutcome_employmentRate(outcome_employmentRate); // This is first calculated by the collector and stored in outcome_employment_rate variable
 		statistics.setOutcome_jobChangingRate(outcome_jobChangingRate); // Job changing rate is calculated by the collector, similarly to employment rate
 
-		// About distribution of person age
-		statistics.setOutcome_person_age_mean(outcome_person_age_mean);
-		statistics.setOutcome_person_age_median(outcome_person_age_median);
-		statistics.setOutcome_person_age_min(outcome_person_age_min);
-		statistics.setOutcome_person_age_max(outcome_person_age_max);
-		statistics.setOutcome_person_age_sd(outcome_person_age_sd);
-		statistics.setOutcome_person_age_kurtosis(outcome_person_age_kurtosis);
-		statistics.setOutcome_person_age_skewness(outcome_person_age_skewness);
+		// About distribution of individual age
+		setDistributionalStats(statistics, personAgeCS, "outcome_person_age");
+
+		// About distribution of individual health
+		setDistributionalStats(statistics, personHealthCS, "outcome_person_health");
+
+		// About distribution of individual productivity
+		setDistributionalStats(statistics, personProductivityCS, "outcome_person_productivity");
+
+		// About distribution of individual utility
+		setDistributionalStats(statistics, personUtilityCS, "outcome_person_utility");
+
+		// About distribution of individual search intensity
+		setDistributionalStats(statistics, personSearchIntensityCS, "outcome_person_search_intensity");
+
+		// About distribution of individual job amenities
+		setDistributionalStats(statistics, personAmenitiesCS, "outcome_person_amenities");
+
+		// About distribution of individual wage
+		setDistributionalStats(statistics, personWageCS, "outcome_person_wage");
 	}
 
 

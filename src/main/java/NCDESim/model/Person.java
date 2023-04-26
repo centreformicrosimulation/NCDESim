@@ -108,6 +108,8 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		Amenities,
 		Count,
 		Health,
+		Productivity,
+		SearchIntensity,
 		Utility,
 		Wage,
 		TestVar1,
@@ -121,6 +123,8 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			case Amenities -> job.getAmenity();
 			case Count -> 1.;
 			case Health -> health;
+			case Productivity -> productivity;
+			case SearchIntensity -> searchIntensity;
 			case Wage -> job.getWage();
 			case Utility -> utility;
 			case TestVar1 -> testVar1;
