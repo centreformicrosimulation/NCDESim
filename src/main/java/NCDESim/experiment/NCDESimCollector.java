@@ -281,7 +281,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		statistics.setParameter_noise_amount(model.getNoiseAmount());
 		statistics.setParameter_endTime(model.getEndTime());
 		statistics.setParameter_amenityCostMultiplier(model.getAmenityUnitCost());
-		statistics.setParameter_healthDecayLambda(model.getHealthDecay());
+		statistics.setParameter_healthDecay(model.getHealthDecay());
 		statistics.setParameter_onTheJobSearch(model.isOnTheJobSearch());
 		statistics.setParameter_on_the_job_search_destroy_jobs(model.isDestroyJobs());
 		statistics.setParameter_searchIntensityEmployed(model.getSearchIntensityEmployed());
@@ -296,6 +296,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		statistics.setParameter_cobb_douglas_alpha(model.getCobbDouglasAlpha());
 		statistics.setParameter_amenity_cost_floor_at_zero(model.isAmenityCostFloorAtZero());
 		statistics.setParameter_zero_health_death(model.isZeroHealthDeath());
+		statistics.setParameter_lambda(model.getLambda());
 
 
 		// Model outcomes

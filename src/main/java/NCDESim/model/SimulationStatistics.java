@@ -23,7 +23,7 @@ public class SimulationStatistics {
 
     // Model parameters
     private int parameter_numberOfPersonsInitial, parameter_perYearNumberOfPersons, parameter_numberOfFirmsInitial, parameter_perYearNumberOfFirms, parameter_person_removal_age, parameter_person_maximum_potential_age;
-    private double parameter_shareOfNewFirmsCloned, parameter_endTime, parameter_amenityCostMultiplier, parameter_healthDecayLambda, parameter_searchIntensityEmployed,
+    private double parameter_shareOfNewFirmsCloned, parameter_endTime, parameter_amenityCostMultiplier, parameter_healthDecay, parameter_searchIntensityEmployed, parameter_lambda,
             parameter_SearchIntensityUnemployed, parameter_desired_firm_size, parameter_firm_minimum_size, parameter_firm_minimum_profit, parameter_cobb_douglas_TFP, parameter_cobb_douglas_alpha, parameter_noise_amount;
     private boolean parameter_onTheJobSearch, parameter_heterogenousSearchIntensity, parameter_clone_firms_with_noise, parameter_on_the_job_search_destroy_jobs, parameter_amenity_cost_floor_at_zero, parameter_zero_health_death;
     private UtilityFunctions parameter_utility_function;
