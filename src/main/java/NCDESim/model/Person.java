@@ -202,20 +202,22 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			Map<Job, Double> utilityOfSampledJobsMap = calculateUtilityOfListOfJobs(sampledJobList); // A map of job - utility combinations for jobs sampled in the previous step.
 			Job selectedJob = findJobWithHighestUtility(utilityOfSampledJobsMap); // Choose the job providing maximum utility to the person, from the list of sampled jobs.
 			Job currentJob = this.job;
-			if (job.getEmployer() != null && model.onTheJobSearch) {
-				if (model.evaluateUtilityFunction(health, selectedJob.getWage()) > model.evaluateUtilityFunction(health, currentJob.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
-					updateEmployment(selectedJob); // Set person's job.
+			if (selectedJob.getEmployer() != null) {
+				if (job.getEmployer() != null && model.onTheJobSearch) {
+					if (model.evaluateUtilityFunction(health, selectedJob.getWage()) > model.evaluateUtilityFunction(health, currentJob.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
+						updateEmployment(selectedJob); // Set person's job.
 
-					if (!model.destroyJobs) { // If destroyJobs parameter is set to false, the job that individual leaves is added to the list from which other individuals can sample jobs
-						model.getJobList().add(currentJob);
+						if (!model.destroyJobs) { // If destroyJobs parameter is set to false, the job that individual leaves is added to the list from which other individuals can sample jobs
+							model.getJobList().add(currentJob);
+						}
+
+						model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers.
+						setFlagChangedJobs(true); // Record the fact that employed individual changed jobs by setting flagChangedJobs to true.
 					}
-
-					model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers.
-					setFlagChangedJobs(true); // Record the fact that employed individual changed jobs by setting flagChangedJobs to true.
+				} else {
+					updateEmployment(selectedJob); // Set person's job
+					model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers
 				}
-			} else {
-				updateEmployment(selectedJob); // Set person's job
-				model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers
 			}
 
 		}
@@ -257,7 +259,9 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 				keys.add(entry.getKey()); // ...add to a list of jobs with the highest utility
 			}
 		}
-		jobToReturn = keys.get(0);
+		if (keys.size() > 0) {
+			jobToReturn = keys.get(0);
+		} else jobToReturn = new Job(null, 0., 0.);
 		return jobToReturn;
 	}
 
