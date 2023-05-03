@@ -34,15 +34,15 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
     Long seedIfFixed = 1166517026L;
     @GUIparameter(description = "Set the number of persons to create at launch")
-    Integer initialNumberOfPersons = 101;
+    Integer initialNumberOfPersons = 20;
     @GUIparameter(description = "Set the number of persons to create each year")
-    Integer perYearNumberOfPersons = 100;
+    Integer perYearNumberOfPersons = 20;
     @GUIparameter(description = "Set the number of firms to create at launch")
-    Integer initialNumberOfFirms = 10;
+    Integer initialNumberOfFirms = 2;
     @GUIparameter(description = "Set the number of firms to create each year")
     Integer perYearNumberOfFirms = 10;
     @GUIparameter(description = "Set the equilibrium number of workers each firm wants to achieve")
-    Integer firmDesiredSize = 5;
+    Integer firmDesiredSize = 10;
     @GUIparameter(description = "Set the share of firms cloned each year")
     Double shareOfNewFirmsCloned = 0.9;
     @GUIparameter(description = "Toggle to add random variation (noise) to cloned firms")
@@ -50,7 +50,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Set the time at which the simulation will terminate")
     Double endTime = 10000.;
     @GUIparameter(description = "Unit cost of amenity provided by firms")
-    Double amenityUnitCost = 0.01;
+    Double amenityUnitCost = 0.2;
     @GUIparameter(description = "Health decay")
     Double healthDecay = 0.1;
     @GUIparameter(description = "Health effect on productivity parameter")
@@ -63,7 +63,6 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Integer searchIntensityUnemployed = 5;
     @GUIparameter(description = "Search intensity employed")
     Integer searchIntensityEmployed = 1;
-    double desiredFirmSize = initialNumberOfPersons/initialNumberOfFirms;
     @GUIparameter(description = "Age of youngest persons created in the simulation")
     Integer personMinimumAge = 20;
     @GUIparameter(description = "Remove persons from the simulation when they reach this age")
