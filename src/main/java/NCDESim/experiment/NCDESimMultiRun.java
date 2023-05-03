@@ -83,7 +83,7 @@ public class NCDESimMultiRun extends MultiRun {
 		model.setEndTime(100.);
 		model.setAmenityUnitCost(amenityUnitCost);
 		model.setLambda(lambda);
-		model.setPersonRemovalAge((int) personRemovalAge);
+		model.setPersonMaximumAge((int) personRemovalAge);
 		model.setFirmMinimumSize((int) firmMinimumSize);
 		model.setFirmMinimumProfit(firmMinimumProfit);
 		model.setCobbDouglasAlpha(cobbDouglasUtilityAlpha);

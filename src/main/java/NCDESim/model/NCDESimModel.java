@@ -39,6 +39,10 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Integer perYearNumberOfPersons = 100;
     @GUIparameter(description = "Set the number of firms to create at launch")
     Integer initialNumberOfFirms = 10;
+    @GUIparameter(description = "Set the number of firms to create each year")
+    Integer perYearNumberOfFirms = 10;
+    @GUIparameter(description = "Set the equilibrium number of workers each firm wants to achieve")
+    Integer firmDesiredSize = 5;
     @GUIparameter(description = "Set the share of firms cloned each year")
     Double shareOfNewFirmsCloned = 0.9;
     @GUIparameter(description = "Toggle to add random variation (noise) to cloned firms")
@@ -60,8 +64,10 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Search intensity employed")
     Integer searchIntensityEmployed = 1;
     double desiredFirmSize = initialNumberOfPersons/initialNumberOfFirms;
+    @GUIparameter(description = "Age of youngest persons created in the simulation")
+    Integer personMinimumAge = 20;
     @GUIparameter(description = "Remove persons from the simulation when they reach this age")
-    Integer personRemovalAge = 60;
+    Integer personMaximumAge = 60;
     @GUIparameter(description = "Maximum potential age, used in normalisation of health score")
     Integer personMaximumPotentialAge = 80;
     @GUIparameter(description = "Remove firms with profits smaller or equal to this value")
@@ -208,11 +214,16 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
     protected void createAgents() {
 		/*
-		Create a collection of individuals to simulate
+		Create a collection of individuals to simulate.
+		A fixed number of individuals of each age is created to obtain cohorts.
 		 */
         individuals = new LinkedList<>();
-        for (int i = 0; i < initialNumberOfPersons; i++) {
-            individuals.add(new Person());
+        int numberOfPersonsToAddInEachAgeGroup = initialNumberOfPersons / (personMaximumAge - personMinimumAge + 1);
+
+        for (int age = personMinimumAge; age <= personMaximumAge; age++) {
+            for (int person = 0; person < numberOfPersonsToAddInEachAgeGroup; person++) {
+                individuals.add(new Person(age));
+            }
         }
 
 		/*
@@ -231,10 +242,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
      */
     protected void addNewFirms() {
 
-        double stockOfIndividuals = getIndividuals().size();
-        double stockOfFirms = getFirms().size();
-        double stockOfJobs = stockOfFirms*desiredFirmSize;
-        int flowOfFirms = (int) Math.max(((stockOfIndividuals-stockOfJobs)/desiredFirmSize), 0);
+        int flowOfFirms = perYearNumberOfFirms;
         numberOfFirmsCreated += flowOfFirms;
 
         int numberOfNewClonedFirmsToAdd = (int) (flowOfFirms * shareOfNewFirmsCloned);
@@ -309,7 +317,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
 
     private void removePersons() {
         ArrayList<Person> personsToRemove = new ArrayList<>();
-        CollectionUtils.select(getIndividuals(), new PersonRemovalFilter<>(personRemovalAge, zeroHealthDeath), personsToRemove);
+        CollectionUtils.select(getIndividuals(), new PersonRemovalFilter<>(personMaximumAge, zeroHealthDeath), personsToRemove);
         Iterator<Person> itr = personsToRemove.iterator();
         while (itr.hasNext()) {
             Person person = itr.next();

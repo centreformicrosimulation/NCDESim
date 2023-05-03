@@ -95,7 +95,7 @@ public abstract class AbstractFirm extends Agent implements EventListener, IDoub
         this.amenity = SimulationEngine.getRnd().nextDouble() * 2 - 1;
         this.wage = SimulationEngine.getRnd().nextDouble();
         this.costOfAmenity = calculateCostOfAmenity();
-        this.desiredSize = model.getInitialNumberOfPersons()/model.getInitialNumberOfFirms();
+        this.desiredSize = model.getFirmDesiredSize();
         this.age = 0;
     }
 

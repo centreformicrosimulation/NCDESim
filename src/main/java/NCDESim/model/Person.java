@@ -42,9 +42,27 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		super();
 
 		this.key = new PanelEntityKey(idCounter++);
-		this.age = SimulationEngine.getRnd().nextInt(20, 60); // Each person has a random age between 20 and 60
-		this.health = SimulationEngine.getRnd().nextDouble(); // Each person has a random health level between 0 and 1
+		this.age = 20; // Each new person in the simulation has age 20
+		this.health = 1; // Each new person in the simulation has perfect health
 	//	this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
+		this.productivity = 1; // Homogenous productivity
+		this.job = new Job(null, 0., 0.); // Job of the person
+
+		// Initialise flag variables
+		this.flagChangedJobs = false; // Indicates if individual who was employed changed jobs
+
+		// Initialise lagged values
+		this.health_L1 = health; // In the first period, lagged value of health is equal to the value of health
+		this.productivity_L1 = productivity; // In the first period, lagged value of productivity is equal to the value of productivity
+	}
+
+	public Person(int age) {
+		super();
+
+		this.key = new PanelEntityKey(idCounter++);
+		this.age = age; // Each person has a specified age
+		this.health = SimulationEngine.getRnd().nextDouble(); // Each person has a random health level between 0 and 1
+		//	this.productivity = SimulationEngine.getRnd().nextDouble(); // Each person has a random productivity between 0 and 1
 		this.productivity = 1; // Homogenous productivity
 		this.job = new Job(null, 0., 0.); // Job of the person
 

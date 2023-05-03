@@ -287,7 +287,7 @@ public class NCDESimCollector extends AbstractSimulationCollectorManager impleme
 		statistics.setParameter_searchIntensityEmployed(model.getSearchIntensityEmployed());
 		statistics.setParameter_SearchIntensityUnemployed(model.getSearchIntensityUnemployed());
 		statistics.setParameter_desired_firm_size(model.getDesiredFirmSize());
-		statistics.setParameter_person_removal_age(model.getPersonRemovalAge());
+		statistics.setParameter_person_removal_age(model.getPersonMaximumAge());
 		statistics.setParameter_person_maximum_potential_age(model.getPersonMaximumPotentialAge());
 		statistics.setParameter_firm_minimum_size(model.getFirmMinimumSize());
 		statistics.setParameter_firm_minimum_profit(model.getFirmMinimumProfit());
