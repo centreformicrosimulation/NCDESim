@@ -52,7 +52,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Unit cost of amenity provided by firms")
     Double amenityUnitCost = 0.2;
     @GUIparameter(description = "Health decay")
-    Double healthDecay = 0.1;
+    Double healthDecay = 0.6;
     @GUIparameter(description = "Health effect on productivity parameter")
     Double lambda = 1.;
     @GUIparameter(description = "Toggle to switch on the job search on / off")

@@ -172,16 +172,12 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 
 	// Method to calculate the level of health
 	public void updateHealth() {
-	//	health = health_L1 - (model.getLambda() * age) + job.getAmenity(); // Level of health = previous level of health + alpha * level of amenity in current job
-	//	double healthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), age) - 1) + job.getAmenity()), 1); // Health score
 
-	//	double currentHealthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), age) - 1) + job.getAmenity()), 1);
-	//	double maximumPotentialAgeHealthScore = Math.min((health_L1 - (Math.pow(1 + model.getLambda(), 80) - 1) + job.getAmenity()), 1);
-
-		double maximumPotentialHealthDecay = (Math.pow(1 + model.getHealthDecay(), model.getPersonMaximumPotentialAge()) - 1); // Normalisation factor based on maximum possible health decay
-		double currentHealthDecay = (Math.pow(1 + model.getHealthDecay(), age) - 1);
-		double normalisedHealthDecay = currentHealthDecay/maximumPotentialHealthDecay;
+		double maximumPotentialHealthDecay = Math.pow(model.getHealthDecay(), model.getPersonMaximumPotentialAge()); // Normalisation factor based on maximum possible health decay
+		double currentHealthDecay = Math.pow(model.getHealthDecay(), age);
+		double normalisedHealthDecay = Math.pow((currentHealthDecay/maximumPotentialHealthDecay), -0.08); // Note that exponent determines the shape of the function, see the graph / Python file graphing the health decay function
 		health = Math.min((health_L1 - normalisedHealthDecay + job.getAmenity()), 1); // Health score with normalised health decay
+//		System.out.println("For individual " + getKey().getId() + " lagged health was " + health_L1 + " normalised health decay is " + normalisedHealthDecay + " and job amenity is " + job.getAmenity() + ". New health is " + health);
 	}
 
 	public void updateProductivity() {
