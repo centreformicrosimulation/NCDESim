@@ -52,9 +52,15 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Unit cost of amenity provided by firms")
     Double amenityUnitCost = 0.2;
     @GUIparameter(description = "Health decay")
-    Double healthDecay = 0.6;
+    Double healthDecay = 0.45;
     @GUIparameter(description = "Health effect on productivity parameter")
     Double lambda = 1.;
+    @GUIparameter(description = "Probability of a negative health shock")
+    Double healthShockProbability = 0.;
+    @GUIparameter(description = "Health shock % reduction of health (0 - 100)")
+    Integer healthShockMagnitudePct = 50;
+    @GUIparameter(description = "Global or individual level probability of health shock")
+    boolean healthShockGlobal = true;
     @GUIparameter(description = "Toggle to switch on the job search on / off")
     boolean onTheJobSearch = true; // If true, currently employed individuals will also look for jobs each period
     @GUIparameter(description = "Toggle to destroy jobs left during on the job search")
@@ -88,6 +94,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Double noiseAmount = 0.1;
 
     private int time;
+    private double healthShockRandomDraw; // To determine if health shock occurs in a given period, if it is applied to every individual (controlled by healthShockHeterogeneous parameter)
     private List<Person> individuals;
     private Set<AbstractFirm> firms;
     private List<Job> jobList; //List of job offers made by firms, characterised by wage and amenity
@@ -168,6 +175,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
                 time++;
                 clearJobList();
                 numberOfFirmsCreated = 0;
+                healthShockRandomDraw = SimulationEngine.getRnd().nextDouble();
             }
         }
     }

@@ -90,6 +90,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			case BeginNewYear -> beginNewYear();
 			case Update -> {
 				updateHealth();
+				healthShock(); // Health shock occurs with a probability and magnitude specified in the GUI
 				updateProductivity();
 				updateUtility();
 			}
@@ -168,6 +169,19 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 
 	public void age() {
 		age++;
+	}
+
+	// Introduce health shock reducing individuals' health by model.healthShockMagnitude % occurring with a probability of model.healthShockProbability
+	public void healthShock() {
+		if (model.isHealthShockGlobal()) { // If true, apply health shock to every individual
+			if (model.getHealthShockRandomDraw() < model.getHealthShockProbability()) { // If randomly drawn double < health shock probability, health shock occurs for everyone in the simulation
+				health *= (double) (100 - model.getHealthShockMagnitudePct()) /100;
+			}
+		} else {
+			if (SimulationEngine.getRnd().nextDouble() < model.getHealthShockProbability()) { // If randomly drawn double < health shock probability, health shock occurs for this person
+				health *= (double) (100 - model.getHealthShockMagnitudePct()) /100;
+			}
+		}
 	}
 
 	// Method to calculate the level of health
