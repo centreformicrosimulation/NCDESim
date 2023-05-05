@@ -34,11 +34,11 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
     Long seedIfFixed = 1166517026L;
     @GUIparameter(description = "Set the number of persons to create at launch")
-    Integer initialNumberOfPersons = 20;
+    Integer initialNumberOfPersons = 410;
     @GUIparameter(description = "Set the number of persons to create each year")
-    Integer perYearNumberOfPersons = 20;
+    Integer perYearNumberOfPersons = 41;
     @GUIparameter(description = "Set the number of firms to create at launch")
-    Integer initialNumberOfFirms = 2;
+    Integer initialNumberOfFirms = 100;
     @GUIparameter(description = "Set the number of firms to create each year")
     Integer perYearNumberOfFirms = 10;
     @GUIparameter(description = "Set the equilibrium number of workers each firm wants to achieve")
@@ -58,7 +58,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Probability of a negative health shock")
     Double healthShockProbability = 0.;
     @GUIparameter(description = "Health shock % reduction of health (0 - 100)")
-    Integer healthShockMagnitudePct = 50;
+    Integer healthShockMagnitudePct = 10;
     @GUIparameter(description = "Global or individual level probability of health shock")
     boolean healthShockGlobal = true;
     @GUIparameter(description = "Toggle to switch on the job search on / off")
