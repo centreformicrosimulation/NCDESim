@@ -4,8 +4,6 @@ import microsim.engine.ExperimentBuilder;
 import microsim.engine.SimulationEngine;
 import microsim.gui.shell.MicrosimShell;
 import NCDESim.model.NCDESimModel;
-import NCDESim.experiment.NCDESimCollector;
-import NCDESim.experiment.NCDESimObserver;
 
 public class NCDESimStart implements ExperimentBuilder {
 
@@ -22,7 +20,7 @@ public class NCDESimStart implements ExperimentBuilder {
 		* database during the simulation, an exception will be thrown.  */
 		engine.setTurnOffDatabaseConnection(false);
 
-		MicrosimShell gui = null;
+		MicrosimShell gui;
 		if (showGui) {
 			gui = new MicrosimShell(engine);
 			gui.setVisible(true);

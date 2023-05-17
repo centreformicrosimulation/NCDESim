@@ -1,88 +1,54 @@
 package NCDESim.model;
 
-import microsim.data.db.PanelEntityKey;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
-import microsim.statistics.IDoubleSource;
-import microsim.statistics.regression.RegressionUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+/**
+ * Agent class contains fields common to all simulated objects:
+ *  Person extends Agent
+ *  AbstractFirm extends Agent
+ *      FirmTypeA extends AbstractFirm (Multi-level inheritance)
+ */
 
-@Entity
-public class Agent implements EventListener, IDoubleSource {
+@Getter
+@Setter
+@ToString
+public abstract class Agent implements EventListener {
 
-	@Id
-	private PanelEntityKey key = new PanelEntityKey(idCounter++);
+    protected NCDESimModel model;
 
-	@Transient
-	private static long idCounter = 1000000;
+    /*
+    EventListener
+     */
 
-	private double wealth = 100 * SimulationEngine.getRnd().nextDouble();		//Each agent has a random endowment of wealth
+    public enum Processes {
 
+    }
 
-	// ---------------------------------------------------------------------
-	// EventListener
-	// ---------------------------------------------------------------------
+    public void onEvent(Enum<?> type) {
 
-	public enum Processes {
-		AgentProcess;
-	}
+    }
 
-	public void onEvent(Enum<?> type) {
-		switch ((Processes) type) {
-		case AgentProcess:
-			//TODO: code to manage process
-			if(RegressionUtils.event(0.1)) {	//Lose 90% of wealth with a 10% probability
-				wealth /= 10.;
-			}
-			else {
-				wealth *= 1.1;			//Else wealth grows steadily by 10% per time-step
-			}
+    /*
+    Constructors
+     */
 
-			break;
-		}
-	}
+    public Agent() {
+        this.model = (NCDESimModel) SimulationEngine.getInstance().getManager(NCDESimModel.class.getCanonicalName());
+    }
 
+    /*
+    Destructor
+     */
 
+    public void kill() {
+        this.model = null;
+    }
 
-	// ---------------------------------------------------------------------
-	// IDoubleSource
-	// ---------------------------------------------------------------------
-
-	public enum Variables{
-		Wealth;
-	}
-
-	@Override
-	public double getDoubleValue(Enum<?> variable) {
-		switch((Variables) variable){
-			case Wealth:
-				return wealth;
-
-			default: 
-				throw new IllegalArgumentException("Unsupported variable");
-		}
-	}
-
-
-	// ---------------------------------------------------------------------
-	// Own methods
-	// ---------------------------------------------------------------------
-
-
-
-	// ---------------------------------------------------------------------
-	// Access methods
-	// ---------------------------------------------------------------------
-
-	public PanelEntityKey getKey() {
-		return key;
-	}
-
-	public double getWealth() {
-		return wealth;
-	}
-
+    /*
+    Access methods are handled by Lombok
+     */
 }
