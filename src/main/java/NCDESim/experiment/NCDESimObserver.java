@@ -53,7 +53,7 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 
 	private TimeSeriesSimulationPlotter csAgePlotter, csHealthPlotter, csWagePlotter, csUtilityPlotter, csAmenitiesPlotter, averageAgePlotter,
 			averageWagePlotter, averageEmployedPlotter, averageHealthPlotter, averageFirmAmenitiesPlotter, averageIndividualAmenitiesPlotter, averageUtilityPlotter, averageProfitPlotter,
-			averageSizePlotter, populationPlotter, numberOfJobsPlotter, numberOfFirmsCreatedAndDestroyedPlotter;
+			averageSizePlotter, populationPlotter, numberOfJobsPlotter, numberOfFirmsCreatedAndDestroyedPlotter, numberOfFirmsDestroyedByReason;
 
 	private ScatterplotSimulationPlotter scatterIndividualHealthUtility, scatterIndividualAmenityHealth, scatterIndividualHealthWages, scatterIndividualWagesAmenities, scatterIndividualWagesAmenitiesCS;
 	private ScatterplotTest csScatterIndividualHealthUtility, csScatterIndividualAmenityHealth, csScatterIndividualHealthWages, csScatterIndividualWagesAmenities, csScatterIndividualWagesAmenitiesCS;
@@ -113,6 +113,14 @@ public class NCDESimObserver extends AbstractSimulationObserverManager implement
 			numberOfFirmsCreatedAndDestroyedPlotter.addSeries("Firms created", (IIntSource) new MultiTraceFunction.Integer(model, NCDESimModel.IntVariables.NumberOfFirmsCreated));
 			numberOfFirmsCreatedAndDestroyedPlotter.addSeries("Firms destroyed", (IIntSource) new MultiTraceFunction.Integer(model, NCDESimModel.IntVariables.NumberOfFirmsDestroyed));
 			addChart(numberOfFirmsCreatedAndDestroyedPlotter, "MODEL Firm entry and exit");
+
+			/*
+			 * FIRM DESTRUCTION RATES BY REASON
+			 */
+			numberOfFirmsDestroyedByReason = new TimeSeriesSimulationPlotter("Number of destroyed firms, by reason", "Number");
+			numberOfFirmsDestroyedByReason.addSeries("Too small", (IIntSource) new MultiTraceFunction.Integer(model, NCDESimModel.IntVariables.NumberOfFirmsDestroyedSize));
+			numberOfFirmsDestroyedByReason.addSeries("Unprofitable", (IIntSource) new MultiTraceFunction.Integer(model, NCDESimModel.IntVariables.NumberOfFirmsDestroyedProfit));
+			addChart(numberOfFirmsDestroyedByReason, "MODEL Firm exit reason");
 
 
 			/*

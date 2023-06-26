@@ -34,19 +34,19 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Seed of the (pseudo) random number generator if fixed")
     Long seedIfFixed = 1166517026L;
     @GUIparameter(description = "Set the number of persons to create at launch")
-    Integer initialNumberOfPersons = 410;
+    Integer initialNumberOfPersons = 0;
     @GUIparameter(description = "Set the number of persons to create each year")
-    Integer perYearNumberOfPersons = 41;
+    Integer perYearNumberOfPersons = 20;
     @GUIparameter(description = "Set the number of firms to create at launch")
-    Integer initialNumberOfFirms = 100;
+    Integer initialNumberOfFirms = 0;
     @GUIparameter(description = "Set the number of firms to create each year")
-    Integer perYearNumberOfFirms = 10;
+    Integer perYearNumberOfFirms = 20;
     @GUIparameter(description = "Set the equilibrium number of workers each firm wants to achieve")
-    Integer firmDesiredSize = 10;
+    Integer firmDesiredSize = 1;
     @GUIparameter(description = "Set the share of firms cloned each year")
     Double shareOfNewFirmsCloned = 0.9;
-    @GUIparameter(description = "Toggle to add random variation (noise) to cloned firms")
-    boolean cloneWithNoise = true;
+//    @GUIparameter(description = "Toggle to add random variation (noise) to cloned firms")
+    boolean cloneWithNoise = false;
     @GUIparameter(description = "Set the time at which the simulation will terminate")
     Double endTime = 10000.;
     @GUIparameter(description = "Unit cost of amenity provided by firms")
@@ -69,6 +69,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     Integer searchIntensityUnemployed = 5;
     @GUIparameter(description = "Search intensity employed")
     Integer searchIntensityEmployed = 1;
+    @GUIparameter(description = "Remain inactive below this utility level")
+    Double utilityInactive = 0.1;
     @GUIparameter(description = "Age of youngest persons created in the simulation")
     Integer personMinimumAge = 20;
     @GUIparameter(description = "Remove persons from the simulation when they reach this age")
@@ -89,8 +91,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     @GUIparameter(description = "Set to true to restrict the firm's cost of providing amenity from the bottom at zero. If false, firms providing negative amenity (dis-amenity) increase their profits.")
     boolean amenityCostFloorAtZero = false;
     @GUIparameter(description = "If true, individuals whose health equals zero will be removed from the simulation")
-    boolean zeroHealthDeath = true;
-    @GUIparameter(description = "Amount of noise +- 1 used when creating new firms.")
+    boolean zeroHealthDeath = false;
+//    @GUIparameter(description = "Amount of noise +- 1 used when creating new firms.")
     Double noiseAmount = 0.1;
 
     private int time;
@@ -98,7 +100,7 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     private List<Person> individuals;
     private Set<AbstractFirm> firms;
     private List<Job> jobList; //List of job offers made by firms, characterised by wage and amenity
-    private int numberOfFirmsCreated, numberOfFirmsDestroyed;
+    private int numberOfFirmsCreated, numberOfFirmsDestroyed, numberOfFirmsDestroyedBecauseOfProfits, numberOfFirmsDestroyedBecauseOfSize;
 
     // ---------------------------------------------------------------------
     // Manager methods
@@ -187,6 +189,9 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         NumberOfPersons,
         NumberOfFirmsCreated,
         NumberOfFirmsDestroyed,
+        NumberOfFirmsDestroyedSize,
+        NumberOfFirmsDestroyedProfit
+
     }
 
     @Override
@@ -197,6 +202,8 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
             case NumberOfPersons -> getIndividuals().size();
             case NumberOfFirmsCreated -> numberOfFirmsCreated;
             case NumberOfFirmsDestroyed -> numberOfFirmsDestroyed;
+            case NumberOfFirmsDestroyedSize -> numberOfFirmsDestroyedBecauseOfSize;
+            case NumberOfFirmsDestroyedProfit -> numberOfFirmsDestroyedBecauseOfProfits;
         };
     }
     // ---------------------------------------------------------------------
@@ -204,7 +211,6 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
     // ---------------------------------------------------------------------
     public enum DoubleVariables {
         NumberOfJobs,
-
     }
     
     @Override
@@ -313,6 +319,15 @@ public class NCDESimModel extends AbstractSimulationManager implements EventList
         List<AbstractFirm> firmsToRemove = new ArrayList<>();
         CollectionUtils.select(getFirms(), new FirmRemovalFilter<>(firmMinimumSize, firmMinimumProfit), firmsToRemove);
         numberOfFirmsDestroyed = firmsToRemove.size();
+
+        // Record statistics about the number of firms removed due to size / profit condition. Note: can potentially add up to more than 1 as this is one OR the other condition in the filter.
+        numberOfFirmsDestroyedBecauseOfSize = 0;
+        numberOfFirmsDestroyedBecauseOfProfits = 0;
+        for (AbstractFirm f : firmsToRemove) {
+            if (f.getEmployeesSet().size() <= firmMinimumSize) numberOfFirmsDestroyedBecauseOfSize++;
+            if (f.getProfit() <= firmMinimumProfit) numberOfFirmsDestroyedBecauseOfProfits++;
+        }
+
         Iterator<AbstractFirm> itr = firmsToRemove.iterator();
         while (itr.hasNext()) {
             AbstractFirm firm = itr.next();
