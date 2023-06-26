@@ -190,12 +190,12 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 		double maximumPotentialHealthDecay = Math.pow(model.getHealthDecay(), model.getPersonMaximumPotentialAge()); // Normalisation factor based on maximum possible health decay
 		double currentHealthDecay = Math.pow(model.getHealthDecay(), age);
 		double normalisedHealthDecay = Math.pow((currentHealthDecay/maximumPotentialHealthDecay), -0.08); // Note that exponent determines the shape of the function, see the graph / Python file graphing the health decay function
-		health = Math.min((health_L1 - normalisedHealthDecay + job.getAmenity()), 1); // Health score with normalised health decay
+		health = Math.max(Math.min((health_L1 - normalisedHealthDecay + job.getAmenity()), 1),0); // Health score with normalised health decay
 //		System.out.println("For individual " + getKey().getId() + " lagged health was " + health_L1 + " normalised health decay is " + normalisedHealthDecay + " and job amenity is " + job.getAmenity() + ". New health is " + health);
 	}
 
 	public void updateProductivity() {
-		productivity = productivity_L1 * ((1 - model.getLambda() * Math.sqrt((1 - health))));
+		productivity = Math.pow(health, 0.5);
 	}
 
 	public void updateUtility() {
@@ -232,7 +232,7 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 			Job currentJob = this.job;
 			if (selectedJob.getEmployer() != null) {
 				if (job.getEmployer() != null && model.onTheJobSearch) {
-					if (model.evaluateUtilityFunction(health, selectedJob.getWage()) > model.evaluateUtilityFunction(health, currentJob.getWage())) { // Only change jobs if utility of the new job is higher than of the current job.
+					if (model.evaluateUtilityFunction(health, selectedJob.getWage()) > Math.max(model.evaluateUtilityFunction(health, currentJob.getWage()),model.getUtilityInactive())) { // Only change jobs if utility of the new job is higher than of the current job, and above the reservation wage
 						updateEmployment(selectedJob); // Set person's job.
 
 						if (!model.destroyJobs) { // If destroyJobs parameter is set to false, the job that individual leaves is added to the list from which other individuals can sample jobs
@@ -243,11 +243,12 @@ public class Person extends Agent implements IDoubleSource, IIntSource, Comparab
 						setFlagChangedJobs(true); // Record the fact that employed individual changed jobs by setting flagChangedJobs to true.
 					}
 				} else {
-					updateEmployment(selectedJob); // Set person's job
-					model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers
+					if (model.evaluateUtilityFunction(health, selectedJob.getWage()) > model.getUtilityInactive()) {
+						updateEmployment(selectedJob); // Set person's job
+						model.getJobList().remove(selectedJob); //Remove accepted job offer from the list of available offers
+					}
 				}
 			}
-
 		}
 	}
 
